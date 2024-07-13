@@ -19,11 +19,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -43,15 +43,20 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
-import coil.compose.rememberImagePainter
+import com.example.paligemma.data.CoordinatesModel
+import com.example.paligemma.data.CoordinatesModelRepoImpl
+import com.example.paligemma.data.CoordinatesModelViewModel
+import com.example.paligemma.data.CoordinatesModelViewModelFactory
+import com.example.paligemma.data.UiState
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
+import java.util.Locale
 import java.util.Objects
 
 
@@ -74,7 +79,7 @@ class MainActivity : ComponentActivity() {
 
 fun Context.createImageFile(): File {
     // Create an image file name
-    val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
+    val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
     val imageFileName = "JPEG_" + timeStamp + "_"
     val image = File.createTempFile(
         imageFileName, /* prefix */
@@ -86,8 +91,16 @@ fun Context.createImageFile(): File {
 
 @Composable
 fun ImageUploadScreen() {
-
     val context = LocalContext.current
+    val viewModel = viewModel<CoordinatesModelViewModel>(
+        factory = CoordinatesModelViewModelFactory(
+            coordinatesModelRepo = CoordinatesModelRepoImpl(
+                applicationContext = context.applicationContext
+            )
+        )
+    )
+    val coordinates by viewModel.coordinates
+
     val cameraImageFile = remember {
         context.createImageFile()
     }
@@ -97,14 +110,11 @@ fun ImageUploadScreen() {
             "com.example.paligemma" + ".provider", cameraImageFile
         )
     }
-
-    var capturedImageUri by remember {
-        mutableStateOf<Uri>(Uri.EMPTY)
-    }
+    var imageUri by rememberSaveable { mutableStateOf<Uri?>(null) }
 
     val cameraLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) {
-            capturedImageUri = cameraImageUri
+            imageUri = cameraImageUri
         }
 
     val permissionLauncher = rememberLauncherForActivityResult(
@@ -118,16 +128,13 @@ fun ImageUploadScreen() {
         }
     }
 
-    var drawRectangle by rememberSaveable { mutableStateOf(false) }
-
-    var imagePickerUri by rememberSaveable { mutableStateOf<Uri?>(null) }
     var textPrompt by rememberSaveable { mutableStateOf("") }
 
     val pickMedia = rememberLauncherForActivityResult(
         ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         uri?.let {
-            imagePickerUri = it
+            imageUri = it
         }
     }
 
@@ -138,6 +145,20 @@ fun ImageUploadScreen() {
         verticalArrangement = Arrangement.spacedBy(10.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        when (
+            coordinates
+        ) {
+            UiState.Loading -> {
+                CircularProgressIndicator()
+            }
+
+            is UiState.Error -> {
+                (coordinates as UiState.Error).e.message?.let { Text(text = it) }
+            }
+
+            else -> {}
+        }
+
         Row(
             modifier = Modifier.align(Alignment.CenterHorizontally),
             horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -181,19 +202,10 @@ fun ImageUploadScreen() {
             }
         }
 
-        if (capturedImageUri.path?.isNotEmpty() == true) {
-            ImageWithBoundingBox(
-                uri = capturedImageUri,
-                drawRectangle = drawRectangle,
-                onDrawButtonClick = { drawRectangle = !drawRectangle }
-            )
-        }
-
-        imagePickerUri?.let { uri ->
+        imageUri?.let { uri ->
             ImageWithBoundingBox(
                 uri = uri,
-                drawRectangle = drawRectangle,
-                onDrawButtonClick = { drawRectangle = !drawRectangle }
+                coordinatesModel = (coordinates as? UiState.Success)?.coordinatesModel
             )
 
             OutlinedTextField(
@@ -214,8 +226,7 @@ fun ImageUploadScreen() {
 
             Button(
                 onClick = {
-                    drawRectangle = !drawRectangle
-                    // TODO
+                    viewModel.getCoordinatesModel(text = textPrompt, uri = imageUri ?: Uri.EMPTY)
                 },
                 modifier = Modifier
                     .padding(all = 4.dp)
@@ -233,7 +244,7 @@ fun ImageUploadScreen() {
 
 
 @Composable
-fun ImageWithBoundingBox(uri: Uri, drawRectangle: Boolean, onDrawButtonClick: () -> Unit) {
+fun ImageWithBoundingBox(uri: Uri, coordinatesModel: CoordinatesModel?) {
     val painter = rememberAsyncImagePainter(uri)
 
     Box(
@@ -248,7 +259,7 @@ fun ImageWithBoundingBox(uri: Uri, drawRectangle: Boolean, onDrawButtonClick: ()
             modifier = Modifier.fillMaxSize()
         )
 
-        if (drawRectangle) {
+        if (coordinatesModel != null) {
             Canvas(modifier = Modifier.fillMaxSize()) {
                 // Example: Draw a red rectangle at specific coordinates
                 val rect = Rect(left = 50f, top = 50f, right = 250f, bottom = 250f)

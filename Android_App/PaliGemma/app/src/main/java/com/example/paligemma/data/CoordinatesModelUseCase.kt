@@ -1,14 +1,13 @@
 package com.example.paligemma.data
 
+import android.net.Uri
 import retrofit2.Response
 
 class CoordinatesModelUseCase(
     private val coordinatesModelRepo: CoordinatesModelRepo
 ) {
 
-    operator fun invoke(text: String): Response<CoordinatesModel> {
-        val data = coordinatesModelRepo.getCoordinatesModel(text)
-        // perform operation on data, implement your business logics
-        return data
+    suspend operator fun invoke(requestModel: RequestModel): Response<CoordinatesModel> {
+        return coordinatesModelRepo.getCoordinatesModel(requestModel)
     }
 }
