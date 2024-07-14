@@ -259,18 +259,26 @@ fun ImageWithBoundingBox(uri: Uri, coordinatesModel: CoordinatesModel?) {
             modifier = Modifier.fillMaxSize()
         )
 
-        if (coordinatesModel != null) {
-            Canvas(modifier = Modifier.fillMaxSize()) {
-                // Example: Draw a red rectangle at specific coordinates
-                val rect = Rect(left = 50f, top = 50f, right = 250f, bottom = 250f)
-                drawRect(
-                    color = Color.Red,
-                    topLeft = Offset(rect.left, rect.top),
-                    size = Size(rect.width, rect.height),
-                    style = Stroke(
-                        width = 10f
+        coordinatesModel?.result?.forEach {
+            Column {
+                Canvas(modifier = Modifier.fillMaxSize()) {
+                    // Example: Draw a red rectangle at specific coordinates
+                    val rect = Rect(
+                        left = it.coordinates[0].toFloat(),
+                        top = it.coordinates[1].toFloat(),
+                        right = it.coordinates[2].toFloat(),
+                        bottom = it.coordinates[3].toFloat()
                     )
-                )
+                    drawRect(
+                        color = Color.Red,
+                        topLeft = Offset(rect.left, rect.top),
+                        size = Size(rect.width, rect.height),
+                        style = Stroke(
+                            width = 10f
+                        )
+                    )
+                }
+                Text(text = it.label)
             }
         }
     }
