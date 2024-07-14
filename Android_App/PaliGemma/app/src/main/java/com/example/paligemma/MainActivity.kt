@@ -236,7 +236,7 @@ fun ImageUploadScreen() {
                     contentColor = Color(0xFFFAFAFA)
                 )
             ) {
-                Text("Draw")
+                Text("Submit")
             }
         }
     }
