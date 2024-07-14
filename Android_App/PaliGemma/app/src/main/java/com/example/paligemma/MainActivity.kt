@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -153,7 +154,10 @@ fun ImageUploadScreen() {
             }
 
             is UiState.Error -> {
-                (coordinates as UiState.Error).e.message?.let { Text(text = it) }
+                (coordinates as UiState.Error).e.let {
+                    Log.d("ERROR", "ImageUploadScreen: $it")
+                    Text(text = it.message?:"Something went wrong!")
+                }
             }
 
             else -> {}
