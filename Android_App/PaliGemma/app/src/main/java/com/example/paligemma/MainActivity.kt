@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
@@ -33,6 +34,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,6 +47,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
@@ -275,31 +278,41 @@ fun ImageWithBoundingBox(uri: Uri, coordinatesModel: CoordinatesModel?) {
     //initial height set at 0.dp
     var imageHeight by remember { mutableIntStateOf(0) }
     var imageWidth by remember { mutableIntStateOf(0) }
+    var leftDistance by remember { mutableFloatStateOf(0.0f) }
 
-    Box {
-        Image(
-            modifier = Modifier
-                .onGloballyPositioned {
-                    imageHeight = it.size.height
-                    imageWidth = it.size.width
-                    Log.d("TAG", "ImageWithBoundingBox: $imageHeight $imageWidth")
-                },
-            painter = painterResource(id = R.drawable.input_image),
-            contentDescription = null
-        )
+    Box(
+//        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Image(
+                modifier = Modifier
+                    .onGloballyPositioned {
+                        leftDistance = it.positionInRoot().x
+                        imageHeight = it.size.height
+                        imageWidth = it.size.width
+                        Log.d("TAG", "ImageWithBoundingBox: $imageHeight $imageWidth")
+                    },
+                painter = painterResource(id = R.drawable.sample),
+                contentDescription = null
+            )
+        }
+
 
         Canvas(modifier = Modifier.fillMaxSize()) {
             dummyResult.result.forEach { result ->
                 val (y1, x1, y2, x2) = result.coordinates
-                val topLeft = Offset(x1.toFloat(), y1.toFloat())
-                val rectWidth = (x2 - x1).toFloat().toDp()
-                val rectHeight = (y2 - y1).toFloat().toDp()
 
                 drawRect(
                     color = if (result.label == "person") Color.Red else Color.Green,
-                    style = Stroke(width = 6f),
-                    topLeft = topLeft,
-                    size = Size(rectWidth.toPx(), rectHeight.toPx())
+                    style = Stroke(width = 5f),
+                    topLeft = Offset(x1.toFloat() + leftDistance,y1.toFloat()),
+                    size = Size(
+                        width = (x2-x1).toFloat(),
+                        height = (y2-y1).toFloat()
+                    )
                 )
             }
         }
@@ -349,19 +362,7 @@ private val dummyResult = CoordinatesModel(
     result = listOf(
         Result(
             coordinates = listOf(
-                489,
-                1076,
-                966,
-                1691
-            ),
-            label = "car"
-        ),
-        Result(
-            coordinates = listOf(
-                438,
-                763,
-                1077,
-                1018
+                39,232,560,361
             ),
             label = "person"
         ),
