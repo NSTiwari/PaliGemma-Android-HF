@@ -1,6 +1,5 @@
 package com.example.paligemma.data
 
-import android.net.Uri
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -13,16 +12,13 @@ class CoordinatesModelViewModel(
 
     var coordinates = mutableStateOf<UiState>(UiState.Idle)
 
-    fun getCoordinatesModel(text: String, uri: Uri) {
+    fun getCoordinatesModel(requestModel: RequestModel) {
         coordinates.value = UiState.Loading
         viewModelScope.launch {
             try {
                 coordinates.value = UiState.Success(
                     coordinatesModelRepo.getCoordinatesModel(
-                        RequestModel(
-                            text,
-                            uri
-                        )
+                        requestModel
                     ).body()
                 )
                 // prepare the data for ui layer

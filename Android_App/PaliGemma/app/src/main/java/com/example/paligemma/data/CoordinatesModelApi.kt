@@ -12,17 +12,17 @@ import retrofit2.http.Part
 
 interface CoordinatesModelApi {
 
-    @POST("api/detect")
+    @POST("/api/detect")
     @Multipart
     suspend fun getCoordinatesModel(
+        @Part("prompt") text: RequestBody?,
         @Part image: MultipartBody.Part?,
-        @Part("text") text: String?
     ): Response<CoordinatesModel>
 
     companion object {
         val instance by lazy {
             Retrofit.Builder()
-                .baseUrl("https://127.0.0.1:8000/")
+                .baseUrl("https://eefe-2409-40d6-1d-9d9c-69f7-3684-b625-23a.ngrok-free.app")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build()
                 .create(CoordinatesModelApi::class.java)
