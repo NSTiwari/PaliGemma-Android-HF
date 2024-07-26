@@ -30,6 +30,7 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -297,15 +298,17 @@ fun ImageWithBoundingBox(uri: Uri, coordinatesModel: CoordinatesModel?) {
                 contentDescription = null
             )
         }
-
+        val map = remember {
+            HashMap<String, Color>()
+        }
         dummyResult.result.forEach { result ->
             val (y1, x1, y2, x2) = result.coordinates
-            val color = remember {
-                getRandomColor()
+            LaunchedEffect(key1 = Unit) {
+                map.putIfAbsent(result.label, getRandomColor())
             }
             Canvas(modifier = Modifier.fillMaxSize()) {
                 drawRect(
-                    color = color,
+                    color = map.getOrDefault(result.label,Color.Transparent),
                     style = Stroke(width = 5f),
                     topLeft = Offset(x1.toFloat() + leftDistance, y1.toFloat()),
                     size = Size(
@@ -320,7 +323,7 @@ fun ImageWithBoundingBox(uri: Uri, coordinatesModel: CoordinatesModel?) {
                     style = TextStyle(
                         fontSize = 10.sp,
                         color = Color.White,
-                        background = color
+                        background = map.getOrDefault(result.label,Color.Transparent)
                     ),
                     size = Size(
                         width = (x2 - x1).toFloat(),
@@ -333,10 +336,9 @@ fun ImageWithBoundingBox(uri: Uri, coordinatesModel: CoordinatesModel?) {
 }
 
 fun getRandomColor(): Color {
-    val random = kotlin.random.Random(255)
-    val r = random.nextInt(255)
-    val g = random.nextInt(255)
-    val b = random.nextInt(255)
+    val r = (0..255).random()
+    val g = (0..255).random()
+    val b = (0..255).random()
     return Color(
         red = r,
         green = g,
@@ -349,6 +351,24 @@ private val dummyResult = CoordinatesModel(
         Result(
             coordinates = listOf(
                 39, 232, 560, 361
+            ),
+            label = "person"
+        ),
+        Result(
+            coordinates = listOf(
+                139, 232, 560, 461
+            ),
+            label = "car"
+        ),
+        Result(
+            coordinates = listOf(
+                129, 312, 860, 561
+            ),
+            label = "car"
+        ),
+        Result(
+            coordinates = listOf(
+                239, 22, 660, 561
             ),
             label = "person"
         ),
