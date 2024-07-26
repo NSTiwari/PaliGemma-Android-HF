@@ -16,12 +16,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -51,8 +48,9 @@ import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.Density
-import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.drawText
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
@@ -279,10 +277,10 @@ fun ImageWithBoundingBox(uri: Uri, coordinatesModel: CoordinatesModel?) {
     var imageHeight by remember { mutableIntStateOf(0) }
     var imageWidth by remember { mutableIntStateOf(0) }
     var leftDistance by remember { mutableFloatStateOf(0.0f) }
+    val density = LocalDensity.current
+    val textMeasurer = rememberTextMeasurer()
 
-    Box(
-//        contentAlignment = Alignment.Center
-    ) {
+    Box {
         Column(
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -300,75 +298,59 @@ fun ImageWithBoundingBox(uri: Uri, coordinatesModel: CoordinatesModel?) {
             )
         }
 
-
-        Canvas(modifier = Modifier.fillMaxSize()) {
-            dummyResult.result.forEach { result ->
-                val (y1, x1, y2, x2) = result.coordinates
-
+        dummyResult.result.forEach { result ->
+            val (y1, x1, y2, x2) = result.coordinates
+            val color = remember {
+                getRandomColor()
+            }
+            Canvas(modifier = Modifier.fillMaxSize()) {
                 drawRect(
-                    color = if (result.label == "person") Color.Red else Color.Green,
+                    color = color,
                     style = Stroke(width = 5f),
-                    topLeft = Offset(x1.toFloat() + leftDistance,y1.toFloat()),
+                    topLeft = Offset(x1.toFloat() + leftDistance, y1.toFloat()),
                     size = Size(
-                        width = (x2-x1).toFloat(),
-                        height = (y2-y1).toFloat()
+                        width = (x2 - x1).toFloat(),
+                        height = (y2 - y1).toFloat()
+                    )
+                )
+                drawText(
+                    textMeasurer = textMeasurer,
+                    topLeft = Offset(x1.toFloat() + leftDistance, y1.toFloat() - 35),
+                    text = result.label.uppercase(),
+                    style = TextStyle(
+                        fontSize = 10.sp,
+                        color = Color.White,
+                        background = color
+                    ),
+                    size = Size(
+                        width = (x2 - x1).toFloat(),
+                        height = (y2 - y1).toFloat()
                     )
                 )
             }
         }
-
-//        dummyResult.result.forEach {
-//            Column {
-//                val y1 = it.coordinates[0].toFloat()
-//                val x1 = it.coordinates[1].toFloat()
-//                val y2 = it.coordinates[2].toFloat()
-//                val x2 = it.coordinates[3].toFloat()
-//
-//                val density = LocalDensity.current
-//                val x1Dp = pxToDp(x1, density)
-//                val y1Dp = pxToDp(y1, density)
-//                val x2Dp = pxToDp(x2, density)
-//                val y2Dp = pxToDp(y2, density)
-//                val rectWidthDp = x2Dp - x1Dp
-//                val rectHeightDp = y2Dp - y1Dp
-//                Canvas(modifier = Modifier.wrapContentSize()) {
-//                    drawRect(
-//                        color = if (it.label == "person") Color.Red else Color.Green,
-//                        topLeft = Offset(
-//                            x = x1Dp.toPx(),
-//                            y = y1Dp.toPx()
-//                        ),
-//                        size = Size(
-//                            width = rectWidthDp.toPx(),
-//                            height = rectHeightDp.toPx()
-//                        ),
-//                        style = Stroke(
-//                            width = 6f
-//                        )
-//                    )
-//                }
-//                Text(
-//                    text = it.label,
-//                    color = Color.Red,
-//                    fontSize = 18.sp
-//                )
-//            }
-//        }
     }
+}
 
+fun getRandomColor(): Color {
+    val random = kotlin.random.Random(255)
+    val r = random.nextInt(255)
+    val g = random.nextInt(255)
+    val b = random.nextInt(255)
+    return Color(
+        red = r,
+        green = g,
+        blue = b
+    )
 }
 
 private val dummyResult = CoordinatesModel(
     result = listOf(
         Result(
             coordinates = listOf(
-                39,232,560,361
+                39, 232, 560, 361
             ),
             label = "person"
         ),
     )
 )
-
-fun pxToDp(px: Float, density: Density): Dp {
-    return with(density) { px.toDp() }
-}
