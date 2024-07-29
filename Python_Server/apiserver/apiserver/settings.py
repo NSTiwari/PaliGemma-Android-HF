@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/5.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
-
+import os
 from pathlib import Path
 from decouple import config
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -21,12 +21,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 # SECRET_KEY = config('DJANGO_SECRET_KEY')
-SECRET_KEY = 'django-insecure--fj9npypuorxv@(#y7q0)wza*d*0+_w#)492^cq3h_kazjk@' # SECRET_KEY stored in file for demo purpose
 
+# SECRET_KEY = 'django-insecure--fj9npypuorxv@(#y7q0)wza*d*0+_w#)492^cq3h_kazjk@' # SECRET_KEY stored in file for demo purpose
+SECRET_KEY = os.environ.get("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ['eefe-2409-40d6-1d-9d9c-69f7-3684-b625-23a.ngrok-free.app']
+# ALLOWED_HOSTS = ['eefe-2409-40d6-1d-9d9c-69f7-3684-b625-23a.ngrok-free.app', '127.0.0.1']
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS").split(" ")
 
 
 # Application definition
