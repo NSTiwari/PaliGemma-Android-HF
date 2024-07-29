@@ -1,5 +1,6 @@
 from ninja import NinjaAPI, File, UploadedFile, Form
 from gradio_client import Client, handle_file
+from PIL import Image
 
 # from decouple import config     #if using your own token
 
@@ -26,11 +27,14 @@ def normalize_coordinates(coord: str, img_x, img_y):
     return numbers
 
 @api.post('/detect')
-def detect(request, prompt: Form[str], image: File[UploadedFile]):
+def detect(request, prompt: Form[str], image: File[UploadedFile], width: Form[int], height: Form[int]):
+    # Resize image.
+    img = Image.open(image).resize((width, height))
+    print(img.size)
     client = Client("big-vision/paligemma")
     prompt_obj = ImageDetection.objects.create(
         prompt=prompt,
-        image=image
+        image=img
     )
     cwd = pathlib.Path(os.getcwd())
     image_path = pathlib.Path(prompt_obj.image.url[1:]) #skipping the forward slash so pathlib doesnt consider it an absolute url
