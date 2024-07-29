@@ -22,7 +22,7 @@ interface CoordinatesModelApi {
     companion object {
         val instance by lazy {
             Retrofit.Builder()
-                .baseUrl("https://eefe-2409-40d6-1d-9d9c-69f7-3684-b625-23a.ngrok-free.app")
+                .baseUrl("https://paligemma.onreder.com")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build()
                 .create(CoordinatesModelApi::class.java)
