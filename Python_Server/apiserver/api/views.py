@@ -27,7 +27,7 @@ def normalize_coordinates(coord: str, img_x, img_y):
     return numbers
 
 @api.post('/detect')
-def detect(request, prompt: Form[str], image: File[UploadedFile], width: Form[int), height: Form[int]):
+def detect(request, prompt: Form[str], image: File[UploadedFile], width: Form[int], height: Form[int]):
     # Resize image.
     print("Width: ", width)
     print("Height: ", height)
