@@ -27,12 +27,10 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-<<<<<<< HEAD
+
 # ALLOWED_HOSTS = ['eefe-2409-40d6-1d-9d9c-69f7-3684-b625-23a.ngrok-free.app', '127.0.0.1']
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS").split(" ")
-=======
-ALLOWED_HOSTS = ['eefe-2409-40d6-1d-9d9c-69f7-3684-b625-23a.ngrok-free.app', '127.0.0.1']
->>>>>>> 206a0b8976dae0895c3d59ac96ca4fb3565ccfe8
+
 
 
 # Application definition
