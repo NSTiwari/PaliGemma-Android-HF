@@ -76,3 +76,4 @@ uvicorn==0.30.1
 watchfiles==0.22.0
 websockets==11.0.3
 gunicorn==20.1.0
+Pillow==8.4.0
