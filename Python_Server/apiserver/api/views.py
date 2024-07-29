@@ -27,20 +27,21 @@ def normalize_coordinates(coord: str, img_x, img_y):
     return numbers
 
 @api.post('/detect')
-def detect(request, prompt: Form[str], image: File[UploadedFile]):
+def detect(request, prompt: Form[str], image: File[UploadedFile], width: Form[int), height: Form[int]):
     # Resize image.
-    width, height = 500, 500
-    img = Image.open(image).resize((width, height))
-    print(img.size)
+    print("Width: ", width)
+    print("Height: ", height)
+    print(image)
+    # img = Image.open(image).resize((width, height))
+    # print(img.size)
     client = Client("big-vision/paligemma")
     prompt_obj = ImageDetection.objects.create(
         prompt=prompt,
-        image=img
+        image=image
     )
     cwd = pathlib.Path(os.getcwd())
     image_path = pathlib.Path(prompt_obj.image.url[1:]) #skipping the forward slash so pathlib doesnt consider it an absolute url
     img_path = pathlib.Path(cwd , image_path)
-
     result = client.predict(
     handle_file(img_path),
     prompt,
