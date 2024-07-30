@@ -36,7 +36,7 @@ def detect(request, prompt: Form[str], image: File[UploadedFile], width: Form[in
     # print(img.size)
     # Resize the image.
     img = Image.open(image.file)
-    img = img.resize((width, height)
+    img = img.resize((width, height), Image.Resampling.LANCZOS)
     img_name = str(image) + '_resized.jpg'
     temp_image_path = pathlib.Path(os.getcwd() + img_name)
     img.save(temp_image_path)
