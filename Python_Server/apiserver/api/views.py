@@ -57,7 +57,8 @@ def detect(request, prompt: Form[str], image: File[UploadedFile], width: Form[in
     temp_img_path = os.getcwd() + '/media/images/resized_img.jpg'
     print(temp_img_path)
     resized_img.save(temp_img_path)
-    
+    print("List of images")
+    print(os.listdir(os.getcwd() +'/media/images/'))
     
     result = client.predict(
     handle_file(temp_img_path),
@@ -67,11 +68,12 @@ def detect(request, prompt: Form[str], image: File[UploadedFile], width: Form[in
     api_name="/compute"
     )
     # print(result)
-
+    print(result)
     # print(f"{result=}")
     data = result[0]["value"]
     img_x = result[2]["width"]
     img_y = result[2]["height"]
+    
     """
     # create a list of objects detected
     [
