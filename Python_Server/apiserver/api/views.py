@@ -56,7 +56,7 @@ def detect(request, prompt: Form[str], image: File[UploadedFile], width: Form[in
     # resized_img_name = 'resized.jpg'
     temp_path = os.getcwd() + '/resized_img.jpg'
     print(temp_path)
-    resized_img.save(temp_image_path)
+    resized_img.save(temp_path)
     
     
     result = client.predict(
