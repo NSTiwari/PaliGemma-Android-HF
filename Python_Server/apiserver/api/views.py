@@ -53,12 +53,13 @@ def detect(request, prompt: Form[str], image: File[UploadedFile], width: Form[in
     img = Image.open(img_path)
     print(img_path)
     resized_img = img.resize((width, height), Image.Resampling.LANCZOS)
+    media_path = os.getcwd() + '/media/images/'
     # resized_img_name = 'resized.jpg'
-    temp_img_path = os.getcwd() + '/media/images/resized_img.jpg'
+    temp_img_path = media_path + 'resized' + image
     print(temp_img_path)
     resized_img.save(temp_img_path)
     print("List of images")
-    print(os.listdir(os.getcwd() +'/media/images/'))
+    print(os.listdir(media_path))
     
     result = client.predict(
     handle_file(temp_img_path),
@@ -69,6 +70,11 @@ def detect(request, prompt: Form[str], image: File[UploadedFile], width: Form[in
     )
     # print(result)
     print(result)
+
+    print("Delete files.")
+    [os.remove(os.path.join(media_path, f)) for f in os.listdir(media_path) if os.path.isfile(os.path.join(media_path, f))]
+    print("List of images after deletion:")
+    print(os.listdir(media_path))
     # print(f"{result=}")
     data = result[0]["value"]
     img_x = result[2]["width"]
