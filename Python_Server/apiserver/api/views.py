@@ -55,7 +55,7 @@ def detect(request, prompt: Form[str], image: File[UploadedFile], width: Form[in
     resized_img = img.resize((width, height), Image.Resampling.LANCZOS)
     media_path = os.getcwd() + '/media/images/'
     # resized_img_name = 'resized.jpg'
-    temp_img_path = media_path + 'resized' + image
+    temp_img_path = media_path + 'resized' + str(image)
     print(temp_img_path)
     resized_img.save(temp_img_path)
     print("List of images")
