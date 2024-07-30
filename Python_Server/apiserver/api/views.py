@@ -28,19 +28,7 @@ def normalize_coordinates(coord: str, img_x, img_y):
 
 @api.post('/detect')
 def detect(request, prompt: Form[str], image: File[UploadedFile], width: Form[int], height: Form[int]):
-    # Resize image.
-    print("Width: ", width)
-    print("Height: ", height)
-    print(image)
-    # img = Image.open(image).resize((width, height))
-    # print(img.size)
-    # Resize the image.
   
-    # img = img.resize((width, height), Image.Resampling.LANCZOS)
-    # img_name = str(image) + '_resized.jpg'
-    # temp_image_path = pathlib.Path(os.getcwd() + img_name)
-    # img.save(temp_image_path)
-    
     client = Client("big-vision/paligemma")
     prompt_obj = ImageDetection.objects.create(
         prompt=prompt,
@@ -49,32 +37,25 @@ def detect(request, prompt: Form[str], image: File[UploadedFile], width: Form[in
     cwd = pathlib.Path(os.getcwd())
     image_path = pathlib.Path(prompt_obj.image.url[1:]) #skipping the forward slash so pathlib doesnt consider it an absolute url
     img_path = pathlib.Path(cwd , image_path)
-
-    img = Image.open(img_path)
-    print(img_path)
-    resized_img = img.resize((width, height), Image.Resampling.LANCZOS)
     media_path = os.getcwd() + '/media/images/'
-    # resized_img_name = 'resized.jpg'
-    temp_img_path = media_path + 'resized' + str(image)
-    print(temp_img_path)
-    resized_img.save(temp_img_path)
-    print("List of images")
-    print(os.listdir(media_path))
-    
+
+    # Resize image with width, height parameters.
+    img = Image.open(img_path)
+    resized_img = img.resize((width, height), Image.Resampling.LANCZOS)
+    resized_img_path = media_path + 'resized_' + str(image)
+    resized_img.save(resized_img_path)
+
     result = client.predict(
-    handle_file(temp_img_path),
+    handle_file(resized_img_path),
     prompt,
     "paligemma-3b-mix-224", # str in 'Prompt' Textbox component # Literal[] in 'Model' Dropdown component
     "greedy", # Literal['greedy', 'nucleus(0.1)', 'nucleus(0.3)', 'temperature(0.5)'] in 'Decoding' Dropdown component
     api_name="/compute"
     )
-    # print(result)
-    print(result)
 
-    print("Delete files.")
+    # Delete images after processing.
     [os.remove(os.path.join(media_path, f)) for f in os.listdir(media_path) if os.path.isfile(os.path.join(media_path, f))]
-    print("List of images after deletion:")
-    print(os.listdir(media_path))
+    
     # print(f"{result=}")
     data = result[0]["value"]
     img_x = result[2]["width"]
