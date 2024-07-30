@@ -54,8 +54,9 @@ def detect(request, prompt: Form[str], image: File[UploadedFile], width: Form[in
     print(img_path)
     resized_img = img.resize((width, height), Image.Resampling.LANCZOS)
     # resized_img_name = 'resized.jpg'
-    temp_path = os.getcwd()
-    resized_img.save(temp_image_path + '/resized_img.jpg')
+    temp_path = os.getcwd() + '/resized_img.jpg'
+    print(temp_path)
+    resized_img.save(temp_image_path)
     
     
     result = client.predict(
