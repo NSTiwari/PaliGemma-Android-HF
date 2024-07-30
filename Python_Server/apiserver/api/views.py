@@ -36,12 +36,12 @@ def detect(request, prompt: Form[str], image: File[UploadedFile], width: Form[in
     # print(img.size)
     # Resize the image.
     img = Image.open(image)
-    img = img.resize(width, height)
+    img = img.resize((width, height), Image.Resampling.LANCZOS)
     
     client = Client("big-vision/paligemma")
     prompt_obj = ImageDetection.objects.create(
         prompt=prompt,
-        image=imag
+        image=img
     )
     cwd = pathlib.Path(os.getcwd())
     image_path = pathlib.Path(prompt_obj.image.url[1:]) #skipping the forward slash so pathlib doesnt consider it an absolute url
