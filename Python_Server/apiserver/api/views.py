@@ -54,13 +54,13 @@ def detect(request, prompt: Form[str], image: File[UploadedFile], width: Form[in
     print(img_path)
     resized_img = img.resize((width, height), Image.Resampling.LANCZOS)
     # resized_img_name = 'resized.jpg'
-    temp_path = os.getcwd() + '/resized_img.jpg'
-    print(temp_path)
-    resized_img.save(temp_path)
+    temp_img_path = os.getcwd() + '/media/images/resized_img.jpg'
+    print(temp_img_path)
+    resized_img.save(temp_img_path)
     
     
     result = client.predict(
-    handle_file(img_path),
+    handle_file(temp_img_path),
     prompt,
     "paligemma-3b-mix-224", # str in 'Prompt' Textbox component # Literal[] in 'Model' Dropdown component
     "greedy", # Literal['greedy', 'nucleus(0.1)', 'nucleus(0.3)', 'temperature(0.5)'] in 'Decoding' Dropdown component
