@@ -35,20 +35,29 @@ def detect(request, prompt: Form[str], image: File[UploadedFile], width: Form[in
     # img = Image.open(image).resize((width, height))
     # print(img.size)
     # Resize the image.
-    img = Image.open(image.file)
-    img = img.resize((width, height), Image.Resampling.LANCZOS)
-    img_name = str(image) + '_resized.jpg'
-    temp_image_path = pathlib.Path(os.getcwd() + img_name)
-    img.save(temp_image_path)
+  
+    # img = img.resize((width, height), Image.Resampling.LANCZOS)
+    # img_name = str(image) + '_resized.jpg'
+    # temp_image_path = pathlib.Path(os.getcwd() + img_name)
+    # img.save(temp_image_path)
     
     client = Client("big-vision/paligemma")
     prompt_obj = ImageDetection.objects.create(
         prompt=prompt,
-        image=temp_image_path
+        image=image
     )
     cwd = pathlib.Path(os.getcwd())
     image_path = pathlib.Path(prompt_obj.image.url[1:]) #skipping the forward slash so pathlib doesnt consider it an absolute url
     img_path = pathlib.Path(cwd , image_path)
+
+    img = Image.open(img_path)
+    print(img_path)
+    resized_img = img.resize((width, height), Image.Resampling.LANCZOS)
+    # resized_img_name = 'resized.jpg'
+    temp_path = os.getcwd()
+    resized_img.save(temp_image_path + '/resized_img.jpg')
+    
+    
     result = client.predict(
     handle_file(img_path),
     prompt,
