@@ -32,6 +32,7 @@ def detect(request, prompt: Form[str], image: File[UploadedFile], width: Form[in
     print("Width: ", width)
     print("Height: ", height)
     print("Original image: ", str(image))
+    print("Prompt: ", prompt)
     client = Client("big-vision/paligemma")
     prompt_obj = ImageDetection.objects.create(
         prompt=prompt,
