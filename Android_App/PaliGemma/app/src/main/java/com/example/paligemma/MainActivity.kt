@@ -11,7 +11,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -47,8 +46,6 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
@@ -57,7 +54,8 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
-import coil.compose.rememberAsyncImagePainter
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.example.paligemma.data.CoordinatesModel
 import com.example.paligemma.data.CoordinatesModelRepoImpl
 import com.example.paligemma.data.CoordinatesModelViewModel
@@ -104,6 +102,10 @@ fun Context.createImageFile(): File {
 @Composable
 fun ImageUploadScreen() {
     val context = LocalContext.current
+
+    var imageHeight by remember { mutableIntStateOf(0) }
+    var imageWidth by remember { mutableIntStateOf(0) }
+
     val viewModel = viewModel<CoordinatesModelViewModel>(
         factory = CoordinatesModelViewModelFactory(
             coordinatesModelRepo = CoordinatesModelRepoImpl(
@@ -127,6 +129,7 @@ fun ImageUploadScreen() {
     val cameraLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) {
             imageUri = cameraImageUri
+            viewModel.resetData()
         }
 
     val permissionLauncher = rememberLauncherForActivityResult(
@@ -146,6 +149,7 @@ fun ImageUploadScreen() {
         ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         uri?.let {
+            viewModel.resetData()
             imageUri = it
         }
     }
@@ -156,129 +160,126 @@ fun ImageUploadScreen() {
         verticalArrangement = Arrangement.spacedBy(10.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        when (
-            coordinates
-        ) {
-            UiState.Loading -> {
-                CircularProgressIndicator()
+        imageUri?.let {
+            ImageWithBoundingBox(
+                uri = it,
+                coordinatesModel = (coordinates as? UiState.Success)?.coordinatesModel
+            ) { h, w ->
+                imageHeight = h
+                imageWidth = w
             }
+        }
 
-            is UiState.Error -> {
-                (coordinates as UiState.Error).e.let {
-                    Log.d("ERROR", "ImageUploadScreen: $it")
-                    Text(text = it.message ?: "Something went wrong!")
+        if (coordinates is UiState.Loading) {
+            CircularProgressIndicator()
+        } else {
+            when (
+                coordinates
+            ) {
+                is UiState.Error -> {
+                    (coordinates as UiState.Error).e.let {
+                        Log.d("ERROR", "ImageUploadScreen: $it")
+                        Text(text = it.message ?: "Something went wrong!")
+                    }
+                }
+
+                else -> {}
+            }
+            Row(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .align(Alignment.CenterHorizontally),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Button(
+                    onClick = {
+                        val permissionCheckResult =
+                            ContextCompat.checkSelfPermission(
+                                context,
+                                android.Manifest.permission.CAMERA
+                            )
+                        if (permissionCheckResult == PackageManager.PERMISSION_GRANTED) {
+                            cameraLauncher.launch(cameraImageUri)
+                        } else {
+                            // Request a permission
+                            permissionLauncher.launch(android.Manifest.permission.CAMERA)
+                        }
+                    },
+                    modifier = Modifier
+                        .padding(all = 4.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF1A73E8),
+                        contentColor = Color(0xFFFFFFFF)
+                    )
+                ) {
+                    Text("Open Camera")
+                }
+                Button(
+                    onClick = {
+                        pickMedia.launch("image/*")
+                    },
+                    modifier = Modifier
+                        .padding(all = 4.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF1A73E8),
+                        contentColor = Color(0xFFFFFFFF)
+                    )
+                ) {
+                    Text("Upload Image")
                 }
             }
 
-            else -> {}
-        }
-
-        ImageWithBoundingBox(
-            uri = Uri.EMPTY,
-            coordinatesModel = (coordinates as? UiState.Success)?.coordinatesModel
-        )
-
-        Row(
-            modifier = Modifier
-                .padding(16.dp)
-                .align(Alignment.CenterHorizontally),
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Button(
-                onClick = {
-                    val permissionCheckResult =
-                        ContextCompat.checkSelfPermission(
-                            context,
-                            android.Manifest.permission.CAMERA
-                        )
-                    if (permissionCheckResult == PackageManager.PERMISSION_GRANTED) {
-                        cameraLauncher.launch(cameraImageUri)
-                    } else {
-                        // Request a permission
-                        permissionLauncher.launch(android.Manifest.permission.CAMERA)
-                    }
-                },
+            OutlinedTextField(
+                value = textPrompt,
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Color(0xFF1A73E8),
+                    unfocusedBorderColor = Color(0xFF1A73E8),
+                    focusedLabelColor = Color(0xFF1A73E8),
+                    unfocusedLabelColor = Color(0xFF1A73E8)
+                ),
+                label = { Text("Prompt") },
+                onValueChange = { textPrompt = it },
+                placeholder = { Text("Enter text prompt") },
                 modifier = Modifier
-                    .padding(all = 4.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF1A73E8),
-                    contentColor = Color(0xFFFFFFFF)
-                )
-            ) {
-                Text("Open Camera")
-            }
-            Button(
-                onClick = {
-                    pickMedia.launch("image/*")
-                },
-                modifier = Modifier
-                    .padding(all = 4.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF1A73E8),
-                    contentColor = Color(0xFFFFFFFF)
-                )
-            ) {
-                Text("Upload Image")
-            }
-        }
-
-//        imageUri?.let { uri ->
-//        ImageWithBoundingBox(
-//            uri = Uri.EMPTY,
-//            coordinatesModel = (coordinates as? UiState.Success)?.coordinatesModel
-//        )
-
-        OutlinedTextField(
-            value = textPrompt,
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = Color(0xFF1A73E8),
-                unfocusedBorderColor = Color(0xFF1A73E8),
-                focusedLabelColor = Color(0xFF1A73E8),
-                unfocusedLabelColor = Color(0xFF1A73E8)
-            ),
-            label = { Text("Prompt") },
-            onValueChange = { textPrompt = it },
-            placeholder = { Text("Enter text prompt") },
-            modifier = Modifier
-                .padding(all = 4.dp)
-                .align(Alignment.CenterHorizontally),
-        )
-
-        Button(
-            onClick = {
-                viewModel.getCoordinatesModel(
-                    requestModel = RequestModel(
-                        text = textPrompt,
-                        uri = imageUri ?: Uri.EMPTY,
-                        file = cameraImageFile
-                    )
-                )
-            },
-            modifier = Modifier
-                .padding(all = 4.dp)
-                .align(Alignment.CenterHorizontally),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF1A73E8),
-                contentColor = Color(0xFFFAFAFA)
+                    .padding(all = 4.dp)
+                    .align(Alignment.CenterHorizontally),
             )
-        ) {
-            Text("Submit")
+
+            Button(
+                onClick = {
+                    viewModel.getCoordinatesModel(
+                        requestModel = RequestModel(
+                            text = textPrompt,
+                            uri = imageUri ?: Uri.EMPTY,
+                            height = imageHeight.toString(),
+                            width = imageWidth.toString()
+                        )
+                    )
+                },
+                modifier = Modifier
+                    .padding(all = 4.dp)
+                    .align(Alignment.CenterHorizontally),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF1A73E8),
+                    contentColor = Color(0xFFFAFAFA)
+                )
+            ) {
+                Text("Submit")
+            }
         }
-//        }
     }
 }
 
 
 @Composable
-fun ImageWithBoundingBox(uri: Uri, coordinatesModel: CoordinatesModel?) {
-    val painter = rememberAsyncImagePainter(uri)
-
+fun ImageWithBoundingBox(
+    uri: Uri,
+    coordinatesModel: CoordinatesModel?,
+    onSizeChange: (Int, Int) -> Unit
+) {
     //initial height set at 0.dp
-    var imageHeight by remember { mutableIntStateOf(0) }
-    var imageWidth by remember { mutableIntStateOf(0) }
     var leftDistance by remember { mutableFloatStateOf(0.0f) }
-    val density = LocalDensity.current
     val textMeasurer = rememberTextMeasurer()
 
     Box {
@@ -286,29 +287,31 @@ fun ImageWithBoundingBox(uri: Uri, coordinatesModel: CoordinatesModel?) {
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Image(
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(uri)
+                    .build(),
                 modifier = Modifier
                     .onGloballyPositioned {
                         leftDistance = it.positionInRoot().x
-                        imageHeight = it.size.height
-                        imageWidth = it.size.width
-                        Log.d("TAG", "ImageWithBoundingBox: $imageHeight $imageWidth")
+                        onSizeChange(it.size.height, it.size.width)
+                        Log.d("TAG", "ImageWithBoundingBox: ${it.size.height} ${it.size.width}")
                     },
-                painter = painterResource(id = R.drawable.sample),
+//                painter = painterResource(id = R.drawable.sample),
                 contentDescription = null
             )
         }
         val map = remember {
             HashMap<String, Color>()
         }
-        dummyResult.result.forEach { result ->
+        coordinatesModel?.result?.forEach { result ->
             val (y1, x1, y2, x2) = result.coordinates
             LaunchedEffect(key1 = Unit) {
-                map.putIfAbsent(result.label, getRandomColor())
+                map.putIfAbsent(result.label.removeTicks(), getRandomColor())
             }
             Canvas(modifier = Modifier.fillMaxSize()) {
                 drawRect(
-                    color = map.getOrDefault(result.label,Color.Transparent),
+                    color = map.getOrDefault(result.label.removeTicks(), Color.Red),
                     style = Stroke(width = 5f),
                     topLeft = Offset(x1.toFloat() + leftDistance, y1.toFloat()),
                     size = Size(
@@ -319,11 +322,11 @@ fun ImageWithBoundingBox(uri: Uri, coordinatesModel: CoordinatesModel?) {
                 drawText(
                     textMeasurer = textMeasurer,
                     topLeft = Offset(x1.toFloat() + leftDistance, y1.toFloat() - 35),
-                    text = result.label.uppercase(),
+                    text = result.label.removeTicks().uppercase(),
                     style = TextStyle(
                         fontSize = 10.sp,
                         color = Color.White,
-                        background = map.getOrDefault(result.label,Color.Transparent)
+                        background = map.getOrDefault(result.label.removeTicks(), Color.Red)
                     ),
                     size = Size(
                         width = (x2 - x1).toFloat(),
@@ -335,10 +338,14 @@ fun ImageWithBoundingBox(uri: Uri, coordinatesModel: CoordinatesModel?) {
     }
 }
 
+fun String.removeTicks(): String {
+    return this.replace("'", "").trim()
+}
+
 fun getRandomColor(): Color {
-    val r = (0..255).random()
-    val g = (0..255).random()
-    val b = (0..255).random()
+    val r = (1..254).random()
+    val g = (1..254).random()
+    val b = (1..254).random()
     return Color(
         red = r,
         green = g,

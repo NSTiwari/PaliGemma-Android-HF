@@ -24,10 +24,15 @@ class CoordinatesModelViewModel(
                 // prepare the data for ui layer
                 // update ui state with data
             } catch (e: Exception) {
+                e.printStackTrace()
                 // update  ui for error
                 coordinates.value = UiState.Error(e)
             }
         }
+    }
+
+    fun resetData() {
+        coordinates.value = UiState.Idle
     }
 }
 
