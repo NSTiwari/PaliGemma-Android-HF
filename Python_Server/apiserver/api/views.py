@@ -40,9 +40,11 @@ def detect(request, prompt: Form[str], image: File[UploadedFile], width: Form[in
     media_path = os.getcwd() + '/media/images/'
 
     # Resize image with width, height parameters.
+    print(image)
     img = Image.open(img_path)
     resized_img = img.resize((width, height), Image.Resampling.LANCZOS)
     resized_img_path = media_path + 'resized_' + str(image)
+    print(resized_img_path)
     resized_img.save(resized_img_path)
 
     result = client.predict(
