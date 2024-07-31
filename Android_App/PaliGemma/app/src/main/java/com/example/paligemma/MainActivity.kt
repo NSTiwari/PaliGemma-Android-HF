@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -50,6 +51,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
@@ -115,10 +117,10 @@ fun ImageUploadScreen() {
     )
     val coordinates by viewModel.coordinates
 
-    val cameraImageFile = remember {
+    var cameraImageFile = remember {
         context.createImageFile()
     }
-    val cameraImageUri = remember {
+    val cameraImageUri = remember(cameraImageFile) {
         FileProvider.getUriForFile(
             Objects.requireNonNull(context),
             context.packageName + ".provider", cameraImageFile
@@ -194,6 +196,7 @@ fun ImageUploadScreen() {
             ) {
                 Button(
                     onClick = {
+                        cameraImageFile = context.createImageFile()
                         val permissionCheckResult =
                             ContextCompat.checkSelfPermission(
                                 context,
@@ -260,6 +263,7 @@ fun ImageUploadScreen() {
                             width = imageWidth.toString()
                         )
                     )
+                    textPrompt = ""
                 },
                 modifier = Modifier
                     .padding(all = 4.dp)
@@ -296,6 +300,7 @@ fun ImageWithBoundingBox(
                     .data(uri)
                     .build(),
                 modifier = Modifier
+                    .heightIn(max = 150.dp)
                     .onGloballyPositioned {
                         leftDistance = it.positionInRoot().x
                         onSizeChange(it.size.height, it.size.width)

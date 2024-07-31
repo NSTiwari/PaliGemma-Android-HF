@@ -26,9 +26,9 @@ interface CoordinatesModelApi {
         private val client: OkHttpClient =
             OkHttpClient
                 .Builder()
-                .connectTimeout(60, TimeUnit.SECONDS)
-                .writeTimeout(120, TimeUnit.SECONDS)
-                .readTimeout(60, TimeUnit.SECONDS)
+                .connectTimeout(120, TimeUnit.SECONDS)
+                .writeTimeout(240, TimeUnit.SECONDS)
+                .readTimeout(240, TimeUnit.SECONDS)
                 .build()
         val instance by lazy {
             Retrofit.Builder()
