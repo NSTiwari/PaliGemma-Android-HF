@@ -78,7 +78,7 @@ class MainActivity : ComponentActivity() {
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = Color.White
+                    color = Color.Black
                 ) {
                     ImageUploadScreen()
                 }
@@ -171,7 +171,7 @@ fun ImageUploadScreen() {
         }
 
         if (coordinates is UiState.Loading) {
-            CircularProgressIndicator()
+            CircularProgressIndicator(color = Color(0xFF1A73E8))
         } else {
             when (
                 coordinates
@@ -236,7 +236,11 @@ fun ImageUploadScreen() {
                     focusedBorderColor = Color(0xFF1A73E8),
                     unfocusedBorderColor = Color(0xFF1A73E8),
                     focusedLabelColor = Color(0xFF1A73E8),
-                    unfocusedLabelColor = Color(0xFF1A73E8)
+                    unfocusedLabelColor = Color(0xFF1A73E8),
+                    focusedPlaceholderColor = Color.White,
+                    unfocusedPlaceholderColor = Color.White,
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White
                 ),
                 label = { Text("Prompt") },
                 onValueChange = { textPrompt = it },
