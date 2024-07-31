@@ -28,7 +28,10 @@ def normalize_coordinates(coord: str, img_x, img_y):
 
 @api.post('/detect')
 def detect(request, prompt: Form[str], image: File[UploadedFile], width: Form[int], height: Form[int]):
-  
+
+    print("Width: ", width)
+    print("Height: ", height)
+    print("Original image: ", str(image))
     client = Client("big-vision/paligemma")
     prompt_obj = ImageDetection.objects.create(
         prompt=prompt,
@@ -44,6 +47,7 @@ def detect(request, prompt: Form[str], image: File[UploadedFile], width: Form[in
     img = Image.open(img_path)
     resized_img = img.resize((width, height), Image.Resampling.LANCZOS)
     resized_img_path = media_path + 'resized_' + str(image)
+    print("Image path:")
     print(resized_img_path)
     resized_img.save(resized_img_path)
 
@@ -55,6 +59,9 @@ def detect(request, prompt: Form[str], image: File[UploadedFile], width: Form[in
     api_name="/compute"
     )
 
+    print(result)
+    
+
     # Delete images after processing.
     [os.remove(os.path.join(media_path, f)) for f in os.listdir(media_path) if os.path.isfile(os.path.join(media_path, f))]
     
@@ -62,7 +69,9 @@ def detect(request, prompt: Form[str], image: File[UploadedFile], width: Form[in
     data = result[0]["value"]
     img_x = result[2]["width"]
     img_y = result[2]["height"]
-    
+
+    print("img_x: ", img_x)
+    print("img_y: ", img_y)
     """
     # create a list of objects detected
     [
