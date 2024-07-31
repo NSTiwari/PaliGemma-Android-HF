@@ -46,6 +46,7 @@ def detect(request, prompt: Form[str], image: File[UploadedFile], width: Form[in
     # Resize image with width, height parameters.
     print(image)
     img = Image.open(img_path)
+    img = img.convert('RGB')
     resized_img = img.resize((width, height), Image.Resampling.LANCZOS)
     resized_img_path = media_path + 'resized_' + str(image)
     print("Image path:")
