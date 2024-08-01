@@ -86,11 +86,14 @@ def detect(request, prompt: Form[str], image: File[UploadedFile], width: Form[in
     container = []
     errors = []
     print(data)
-    if data == "":
+    if len(data) == 0:
         temp = {}
         temp["error"] = "Detection not found."
         temp["coordinates"] = ''
         errors.append(temp)
+        print("Error in detection:")
+        abc = {"result" : errors}
+        print(abc)
         return {"result": errors}
     else:
         for object in data:
@@ -98,5 +101,7 @@ def detect(request, prompt: Form[str], image: File[UploadedFile], width: Form[in
             temp["label"] = object["class_or_confidence"]
             temp['coordinates'] = normalize_coordinates(object["token"], img_x, img_y)
             container.append(temp)
+            print("Success")
             return {"result": container}
+            
     
