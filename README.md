@@ -7,7 +7,7 @@ If you find this project useful for your work, please cite it using the followin
 
 ```
 @misc{PaliGemma Examples,
-  authors       = {Nitin Tiwari, Sagar Malhotra, Savio Rodrigues},
+  authors      = {Nitin Tiwari, Sagar Malhotra, Savio Rodrigues},
   title        = {PaliGemma on Android using HF},
   year         = {2024},
   publisher    = {GitHub},
