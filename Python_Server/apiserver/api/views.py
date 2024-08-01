@@ -86,6 +86,7 @@ def detect(request, prompt: Form[str], image: File[UploadedFile], width: Form[in
     container = []
     temp = {}
     print(data)
+    print("No. of objects: ", len(data))
     if len(data) == 0:
         errors = {}
         errors["error"] = "Detection not found."
@@ -96,7 +97,11 @@ def detect(request, prompt: Form[str], image: File[UploadedFile], width: Form[in
     else:
         for object in data:
             temp["label"] = object["class_or_confidence"]
+            a = temp["label"]
             temp['coordinates'] = normalize_coordinates(object["token"], img_x, img_y)
+            b = temp['coordinates']
+            print(a)
+            print(b)
             container.append(temp)
             print("Success")
             abc = {"result": container}
