@@ -24,7 +24,11 @@ class CoordinatesModelRepoImpl(
                 text = requestModel.text.toRequestBody(MultipartBody.FORM),
                 width = requestModel.width.toRequestBody(MultipartBody.FORM),
                 height = requestModel.height.toRequestBody(MultipartBody.FORM),
-                image = file!!.asRequestBody(MultipartBody.FORM)
+                image = MultipartBody.Part.createFormData(
+                    name = "image",
+                    filename = file?.name,
+                    body = file!!.asRequestBody(MultipartBody.FORM)
+                )
             )
         }
     }
@@ -34,7 +38,7 @@ class CoordinatesModelRepoImpl(
 fun getTempFile(context: Context, uri: Uri): File? {
     try {
         val resolver = context.contentResolver
-        val tempFile = File(context.cacheDir, "temp_image.jpg")
+        val tempFile = File(context.cacheDir, "${System.currentTimeMillis()}_.jpg")
         val inputStream = resolver.openInputStream(uri) ?: return null
         val outputStream = tempFile.outputStream()
         val buffer = ByteArray(4 * 1024) // Adjust buffer size as needed

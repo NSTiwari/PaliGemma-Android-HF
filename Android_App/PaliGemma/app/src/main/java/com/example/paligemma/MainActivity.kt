@@ -27,6 +27,10 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,6 +40,7 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -48,6 +53,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
@@ -62,7 +68,9 @@ import com.example.paligemma.data.CoordinatesModelRepoImpl
 import com.example.paligemma.data.CoordinatesModelViewModel
 import com.example.paligemma.data.CoordinatesModelViewModelFactory
 import com.example.paligemma.data.RequestModel
+import com.example.paligemma.data.Result
 import com.example.paligemma.data.UiState
+import kotlinx.coroutines.launch
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -89,7 +97,7 @@ class MainActivity : ComponentActivity() {
 
 fun Context.createImageFile(): File {
     // Create an image file name
-    val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
+    val timeStamp = System.currentTimeMillis().toString()
     val imageFileName = "JPEG_" + timeStamp + "_"
     val image = File.createTempFile(
         imageFileName, /* prefix */
@@ -115,9 +123,18 @@ fun ImageUploadScreen() {
     )
     val coordinates by viewModel.coordinates
 
-    var cameraImageFile: File?
-    var cameraImageUri: Uri? = remember {
-        null
+    var shouldRefreshImage by remember {
+        mutableStateOf(false)
+    }
+    val cameraImageFile = remember(shouldRefreshImage) {
+        context.createImageFile()
+    }
+    val cameraImageUri = remember(cameraImageFile) {
+        Log.d("TAG", "ImageUploadScreen: ImageUri updated with ${cameraImageFile.name}")
+        FileProvider.getUriForFile(
+            Objects.requireNonNull(context),
+            context.packageName + ".provider", cameraImageFile
+        )
     }
     var imageUri by rememberSaveable { mutableStateOf<Uri?>(null) }
 
@@ -151,138 +168,147 @@ fun ImageUploadScreen() {
         }
     }
 
-    Column(
-        modifier = Modifier
-            .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        imageUri?.let {
-            ImageWithBoundingBox(
-                uri = it,
-                coordinatesModel = (coordinates as? UiState.Success)?.coordinatesModel
-            ) { h, w ->
-                imageHeight = h
-                imageWidth = w
-            }
-        }
-
-        if (coordinates is UiState.Loading) {
-            CircularProgressIndicator(color = Color(0xFF1A73E8))
-        } else {
-            when (
-                coordinates
-            ) {
-                is UiState.Error -> {
-                    (coordinates as UiState.Error).e.let {
-                        Log.d("ERROR", "ImageUploadScreen: $it")
-                        Text(text = it.message ?: "Something went wrong!")
-                    }
-                }
-
-                else -> {}
-            }
-            Row(
-                modifier = Modifier
-                    .padding(16.dp)
-                    .align(Alignment.CenterHorizontally),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Button(
-                    onClick = {
-                        cameraImageFile = context.createImageFile()
-                        cameraImageUri = FileProvider.getUriForFile(
-                            Objects.requireNonNull(context),
-                            context.packageName + ".provider", cameraImageFile!!
-                        )
-                        val permissionCheckResult =
-                            ContextCompat.checkSelfPermission(
-                                context,
-                                android.Manifest.permission.CAMERA
-                            )
-                        if (permissionCheckResult == PackageManager.PERMISSION_GRANTED) {
-                            cameraLauncher.launch(cameraImageUri!!)
-                        } else {
-                            // Request a permission
-                            permissionLauncher.launch(android.Manifest.permission.CAMERA)
-                        }
-                    },
-                    modifier = Modifier
-                        .padding(all = 4.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF1A73E8),
-                        contentColor = Color(0xFFFFFFFF)
-                    )
-                ) {
-                    Text("Open Camera")
-                }
-                Button(
-                    onClick = {
-                        pickMedia.launch("image/*")
-                    },
-                    modifier = Modifier
-                        .padding(all = 4.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF1A73E8),
-                        contentColor = Color(0xFFFFFFFF)
-                    )
-                ) {
-                    Text("Upload Image")
-                }
-            }
-
-            OutlinedTextField(
-                value = textPrompt,
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Color(0xFF1A73E8),
-                    unfocusedBorderColor = Color(0xFF1A73E8),
-                    focusedLabelColor = Color(0xFF1A73E8),
-                    unfocusedLabelColor = Color(0xFF1A73E8),
-                    focusedPlaceholderColor = Color.White,
-                    unfocusedPlaceholderColor = Color.White,
-                    focusedTextColor = Color.White,
-                    unfocusedTextColor = Color.White
-                ),
-                label = { Text("Prompt") },
-                onValueChange = { textPrompt = it },
-                placeholder = { Text("Enter text prompt") },
-                modifier = Modifier
-                    .padding(all = 4.dp)
-                    .align(Alignment.CenterHorizontally),
-            )
-
-            Button(
-                onClick = {
-                    viewModel.getCoordinatesModel(
-                        requestModel = RequestModel(
-                            text = textPrompt,
-                            uri = imageUri ?: Uri.EMPTY,
-                            height = imageHeight.toString(),
-                            width = imageWidth.toString()
-                        )
-                    )
-                    textPrompt = ""
-                },
-                modifier = Modifier
-                    .padding(all = 4.dp)
-                    .align(Alignment.CenterHorizontally),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF1A73E8),
-                    contentColor = Color(0xFFFAFAFA)
-                )
-            ) {
-                Text("Submit")
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    LaunchedEffect(key1 = coordinates) {
+        if(coordinates is UiState.Error) {
+            scope.launch {
+                snackbarHostState.showSnackbar((coordinates as UiState.Error).e)
             }
         }
     }
+    Scaffold(
+        containerColor = Color.Black,
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState) {
+                Snackbar(
+                    snackbarData = it,
+                    containerColor = Color.Red,
+                    contentColor = Color.White
+                )
+            }
+        }
+    ) { it->
+        Column(
+            modifier = Modifier
+                .padding(it)
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            imageUri?.let {
+                ImageWithBoundingBox(
+                    uri = it,
+                    results = (coordinates as? UiState.Success)?.result
+                ) { h, w ->
+                    imageHeight = h
+                    imageWidth = w
+                }
+            }
+
+            if (coordinates is UiState.Loading) {
+                CircularProgressIndicator(color = Color(0xFF1A73E8))
+            } else {
+
+                Row(
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .align(Alignment.CenterHorizontally),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Button(
+                        onClick = {
+                            shouldRefreshImage = !shouldRefreshImage
+                            val permissionCheckResult =
+                                ContextCompat.checkSelfPermission(
+                                    context,
+                                    android.Manifest.permission.CAMERA
+                                )
+                            if (permissionCheckResult == PackageManager.PERMISSION_GRANTED) {
+                                cameraLauncher.launch(cameraImageUri!!)
+                            } else {
+                                // Request a permission
+                                permissionLauncher.launch(android.Manifest.permission.CAMERA)
+                            }
+                        },
+                        modifier = Modifier
+                            .padding(all = 4.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF1A73E8),
+                            contentColor = Color(0xFFFFFFFF)
+                        )
+                    ) {
+                        Text("Open Camera")
+                    }
+                    Button(
+                        onClick = {
+                            pickMedia.launch("image/*")
+                        },
+                        modifier = Modifier
+                            .padding(all = 4.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF1A73E8),
+                            contentColor = Color(0xFFFFFFFF)
+                        )
+                    ) {
+                        Text("Upload Image")
+                    }
+                }
+
+                OutlinedTextField(
+                    value = textPrompt,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = Color(0xFF1A73E8),
+                        unfocusedBorderColor = Color(0xFF1A73E8),
+                        focusedLabelColor = Color(0xFF1A73E8),
+                        unfocusedLabelColor = Color(0xFF1A73E8),
+                        focusedPlaceholderColor = Color.White,
+                        unfocusedPlaceholderColor = Color.White,
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White
+                    ),
+                    label = { Text("Prompt") },
+                    onValueChange = { textPrompt = it },
+                    placeholder = { Text("Enter text prompt") },
+                    modifier = Modifier
+                        .padding(all = 4.dp)
+                        .align(Alignment.CenterHorizontally),
+                )
+
+                Button(
+                    onClick = {
+                        viewModel.getCoordinatesModel(
+                            requestModel = RequestModel(
+                                text = textPrompt,
+                                uri = imageUri ?: Uri.EMPTY,
+                                height = imageHeight.toString(),
+                                width = imageWidth.toString()
+                            )
+                        )
+                        textPrompt = ""
+                    },
+                    modifier = Modifier
+                        .padding(all = 4.dp)
+                        .align(Alignment.CenterHorizontally),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF1A73E8),
+                        contentColor = Color(0xFFFAFAFA)
+                    )
+                ) {
+                    Text("Submit")
+                }
+            }
+        }
+    }
+
 }
 
 
 @Composable
 fun ImageWithBoundingBox(
     uri: Uri,
-    coordinatesModel: CoordinatesModel?,
+    results : List<Result>?,
     onSizeChange: (Int, Int) -> Unit
 ) {
     //initial height set at 0.dp
@@ -299,7 +325,7 @@ fun ImageWithBoundingBox(
                     .data(uri)
                     .build(),
                 modifier = Modifier
-                    .heightIn(max = 850.dp)
+                    .heightIn(max = 550.dp)
                     .onGloballyPositioned {
                         leftDistance = it.positionInRoot().x
                         onSizeChange(it.size.height, it.size.width)
@@ -310,7 +336,7 @@ fun ImageWithBoundingBox(
         val map = remember {
             HashMap<String, Color>()
         }
-        coordinatesModel?.result?.forEach { result ->
+        results?.forEach { result ->
             val (y1, x1, y2, x2) = result.coordinates
             LaunchedEffect(key1 = Unit) {
                 map.putIfAbsent(result.label.removeTicks(), getRandomColor())
@@ -328,7 +354,8 @@ fun ImageWithBoundingBox(
                 drawText(
                     textMeasurer = textMeasurer,
                     topLeft = Offset(x1.toFloat() + leftDistance, y1.toFloat() - 35),
-                    text = result.label.removeTicks().uppercase(),
+                    text = result.label.removeTicks()
+                        .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.US) else it.toString() },
                     style = TextStyle(
                         fontSize = 10.sp,
                         color = Color.White,

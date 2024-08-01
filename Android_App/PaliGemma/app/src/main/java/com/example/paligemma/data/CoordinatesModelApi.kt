@@ -1,5 +1,6 @@
 package com.example.paligemma.data
 
+import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody
 import retrofit2.Response
@@ -19,7 +20,7 @@ interface CoordinatesModelApi {
         @Part("prompt") text: RequestBody?,
         @Part("width") width: RequestBody?,
         @Part("height") height: RequestBody?,
-        @Part("image\"; filename=\"image.jpg") image: RequestBody?,
+        @Part image : MultipartBody.Part,
     ): Response<CoordinatesModel>
 
     companion object {
