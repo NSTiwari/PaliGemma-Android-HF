@@ -106,6 +106,6 @@ def detect(request, prompt: Form[str], image: File[UploadedFile], width: Form[in
             print("Success")
             abc = {"result": container}
             print(abc)
-            return {"result": container}
+        return {"result": container}
             
     
