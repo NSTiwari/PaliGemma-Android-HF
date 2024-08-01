@@ -51,7 +51,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
@@ -63,7 +62,6 @@ import com.example.paligemma.data.CoordinatesModelRepoImpl
 import com.example.paligemma.data.CoordinatesModelViewModel
 import com.example.paligemma.data.CoordinatesModelViewModelFactory
 import com.example.paligemma.data.RequestModel
-import com.example.paligemma.data.Result
 import com.example.paligemma.data.UiState
 import java.io.File
 import java.text.SimpleDateFormat
@@ -117,21 +115,18 @@ fun ImageUploadScreen() {
     )
     val coordinates by viewModel.coordinates
 
-    var cameraImageFile = remember {
-        context.createImageFile()
-    }
-    val cameraImageUri = remember(cameraImageFile) {
-        FileProvider.getUriForFile(
-            Objects.requireNonNull(context),
-            context.packageName + ".provider", cameraImageFile
-        )
+    var cameraImageFile: File?
+    var cameraImageUri: Uri? = remember {
+        null
     }
     var imageUri by rememberSaveable { mutableStateOf<Uri?>(null) }
 
     val cameraLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) {
-            imageUri = cameraImageUri
-            viewModel.resetData()
+            if (it) {
+                imageUri = cameraImageUri
+                viewModel.resetData()
+            }
         }
 
     val permissionLauncher = rememberLauncherForActivityResult(
@@ -139,7 +134,7 @@ fun ImageUploadScreen() {
     ) {
         if (it) {
             Toast.makeText(context, "Permission Granted", Toast.LENGTH_SHORT).show()
-            cameraLauncher.launch(cameraImageUri)
+            cameraImageUri?.let { it1 -> cameraLauncher.launch(it1) }
         } else {
             Toast.makeText(context, "Permission Denied", Toast.LENGTH_SHORT).show()
         }
@@ -197,13 +192,17 @@ fun ImageUploadScreen() {
                 Button(
                     onClick = {
                         cameraImageFile = context.createImageFile()
+                        cameraImageUri = FileProvider.getUriForFile(
+                            Objects.requireNonNull(context),
+                            context.packageName + ".provider", cameraImageFile!!
+                        )
                         val permissionCheckResult =
                             ContextCompat.checkSelfPermission(
                                 context,
                                 android.Manifest.permission.CAMERA
                             )
                         if (permissionCheckResult == PackageManager.PERMISSION_GRANTED) {
-                            cameraLauncher.launch(cameraImageUri)
+                            cameraLauncher.launch(cameraImageUri!!)
                         } else {
                             // Request a permission
                             permissionLauncher.launch(android.Manifest.permission.CAMERA)
@@ -300,13 +299,11 @@ fun ImageWithBoundingBox(
                     .data(uri)
                     .build(),
                 modifier = Modifier
-                    .heightIn(max = 150.dp)
+                    .heightIn(max = 850.dp)
                     .onGloballyPositioned {
                         leftDistance = it.positionInRoot().x
                         onSizeChange(it.size.height, it.size.width)
-                        Log.d("TAG", "ImageWithBoundingBox: ${it.size.height} ${it.size.width}")
                     },
-//                painter = painterResource(id = R.drawable.sample),
                 contentDescription = null
             )
         }
@@ -361,32 +358,3 @@ fun getRandomColor(): Color {
         blue = b
     )
 }
-
-private val dummyResult = CoordinatesModel(
-    result = listOf(
-        Result(
-            coordinates = listOf(
-                39, 232, 560, 361
-            ),
-            label = "person"
-        ),
-        Result(
-            coordinates = listOf(
-                139, 232, 560, 461
-            ),
-            label = "car"
-        ),
-        Result(
-            coordinates = listOf(
-                129, 312, 860, 561
-            ),
-            label = "car"
-        ),
-        Result(
-            coordinates = listOf(
-                239, 22, 660, 561
-            ),
-            label = "person"
-        ),
-    )
-)
