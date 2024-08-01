@@ -342,10 +342,10 @@ fun ImageWithBoundingBox(
             HashMap<String, Color>()
         }
         results?.forEach { result ->
-            val (y1, x1, y2, x2) = result.coordinates
-            LaunchedEffect(key1 = Unit) {
-                map.putIfAbsent(result.label.removeTicks(), getRandomColor())
+            val (y1, x1, y2, x2) = remember {
+                result.coordinates
             }
+            map.putIfAbsent(result.label.removeTicks(), getRandomColor())
             Canvas(modifier = Modifier.fillMaxSize()) {
                 drawRect(
                     color = map.getOrDefault(result.label.removeTicks(), Color.Transparent),
