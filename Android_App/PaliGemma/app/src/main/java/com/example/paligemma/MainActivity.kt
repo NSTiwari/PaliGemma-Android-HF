@@ -208,7 +208,7 @@ fun ImageUploadScreen() {
             }
 
             if (coordinates is UiState.Loading) {
-                CircularProgressIndicator(color = Color(0xFF1A73E8))
+                CircularProgressIndicator(color = Color(0xFF29B6F6))
             } else {
 
                 Row(
@@ -236,7 +236,8 @@ fun ImageUploadScreen() {
                         modifier = Modifier
                             .padding(all = 4.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF1A73E8),
+                            // Old color = #1A73E8
+                            containerColor = Color(0xFF29B6F6),
                             contentColor = Color(0xFFFFFFFF)
                         )
                     ) {
@@ -249,7 +250,7 @@ fun ImageUploadScreen() {
                         modifier = Modifier
                             .padding(all = 4.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF1A73E8),
+                            containerColor = Color(0xFF29B6F6),
                             contentColor = Color(0xFFFFFFFF)
                         )
                     ) {
@@ -260,10 +261,10 @@ fun ImageUploadScreen() {
                 OutlinedTextField(
                     value = textPrompt,
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Color(0xFF1A73E8),
-                        unfocusedBorderColor = Color(0xFF1A73E8),
-                        focusedLabelColor = Color(0xFF1A73E8),
-                        unfocusedLabelColor = Color(0xFF1A73E8),
+                        focusedBorderColor = Color(0xFF29B6F6),
+                        unfocusedBorderColor = Color(0xFF29B6F6),
+                        focusedLabelColor = Color(0xFF29B6F6),
+                        unfocusedLabelColor = Color(0xFF29B6F6),
                         // focusedIndicatorColor = Color.White,
                         // unfocusedIndicatorColor = Color.White,
                         focusedPlaceholderColor = Color.White,
@@ -296,7 +297,7 @@ fun ImageUploadScreen() {
                         .padding(all = 4.dp)
                         .align(Alignment.CenterHorizontally),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF1A73E8),
+                        containerColor = Color(0xFF29B6F6),
                         contentColor = Color(0xFFFAFAFA)
                     )
                 ) {
