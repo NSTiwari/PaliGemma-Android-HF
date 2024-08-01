@@ -89,7 +89,7 @@ def detect(request, prompt: Form[str], image: File[UploadedFile], width: Form[in
     if len(data) == 0:
         temp = {}
         temp["error"] = "Detection not found."
-        temp["coordinates"] = ''
+        temp["coordinates"] = None
         errors.append(temp)
         print("Error in detection:")
         abc = {"result" : errors}
