@@ -48,6 +48,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
@@ -268,7 +269,8 @@ fun ImageUploadScreen() {
                         focusedPlaceholderColor = Color.White,
                         unfocusedPlaceholderColor = Color.White,
                         focusedTextColor = Color.White,
-                        unfocusedTextColor = Color.White
+                        unfocusedTextColor = Color.White,
+                        cursorColor = Color.White
                     ),
                     label = { Text("Prompt") },
                     onValueChange = { textPrompt = it },
@@ -327,7 +329,7 @@ fun ImageWithBoundingBox(
                     .data(uri)
                     .build(),
                 modifier = Modifier
-                    .heightIn(max = 550.dp)
+                    .heightIn(max = 450.dp)
                     .onGloballyPositioned {
                         leftDistance = it.positionInRoot().x
                         onSizeChange(it.size.height, it.size.width)
@@ -345,7 +347,7 @@ fun ImageWithBoundingBox(
             }
             Canvas(modifier = Modifier.fillMaxSize()) {
                 drawRect(
-                    color = map.getOrDefault(result.label.removeTicks(), Color.Red),
+                    color = map.getOrDefault(result.label.removeTicks(), Color.Transparent),
                     style = Stroke(width = 5f),
                     topLeft = Offset(x1.toFloat() + leftDistance, y1.toFloat()),
                     size = Size(
@@ -361,7 +363,7 @@ fun ImageWithBoundingBox(
                     style = TextStyle(
                         fontSize = 10.sp,
                         color = Color.White,
-                        background = map.getOrDefault(result.label.removeTicks(), Color.Red)
+                        background = map.getOrDefault(result.label.removeTicks(), Color.Transparent)
                     ),
                     size = Size(
                         width = (x2 - x1).toFloat(),
