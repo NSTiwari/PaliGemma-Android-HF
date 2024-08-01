@@ -263,7 +263,7 @@ fun ImageUploadScreen() {
                         unfocusedBorderColor = Color(0xFF1A73E8),
                         focusedLabelColor = Color(0xFF1A73E8),
                         unfocusedLabelColor = Color(0xFF1A73E8),
-                        focusedIndicatorColor = Color.White
+                        focusedIndicatorColor = Color.White,
                         unfocusedIndicatorColor = Color.White,
                         focusedPlaceholderColor = Color.White,
                         unfocusedPlaceholderColor = Color.White,
