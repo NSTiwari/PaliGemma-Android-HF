@@ -99,6 +99,8 @@ def detect(request, prompt: Form[str], image: File[UploadedFile], width: Form[in
             temp['coordinates'] = normalize_coordinates(object["token"], img_x, img_y)
             container.append(temp)
             print("Success")
+            abc = {"result": container}
+            print(abc)
             return {"result": container}
             
     
