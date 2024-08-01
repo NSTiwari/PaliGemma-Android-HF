@@ -54,6 +54,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
@@ -358,11 +359,12 @@ fun ImageWithBoundingBox(
                 )
                 drawText(
                     textMeasurer = textMeasurer,
-                    topLeft = Offset(x1.toFloat() + leftDistance, y1.toFloat() - 35),
+                    topLeft = Offset(x1.toFloat() + leftDistance, y1.toFloat() - 40),
                     text = result.label.removeTicks()
                         .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.US) else it.toString() },
                     style = TextStyle(
-                        fontSize = 10.sp,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
                         color = Color.White,
                         background = map.getOrDefault(result.label.removeTicks(), Color.Transparent)
                     ),
