@@ -29,10 +29,6 @@ def normalize_coordinates(coord: str, img_x, img_y):
 @api.post('/detect')
 def detect(request, prompt: Form[str], image: File[UploadedFile], width: Form[int], height: Form[int]):
 
-    print("Width: ", width)
-    print("Height: ", height)
-    print("Original image: ", str(image))
-    print("Prompt: ", prompt)
     client = Client("big-vision/paligemma")
     prompt_obj = ImageDetection.objects.create(
         prompt=prompt,
@@ -44,13 +40,10 @@ def detect(request, prompt: Form[str], image: File[UploadedFile], width: Form[in
     media_path = os.getcwd() + '/media/images/'
 
     # Resize image with width, height parameters.
-    print(image)
     img = Image.open(img_path)
     img = img.convert('RGB')
     resized_img = img.resize((width, height), Image.Resampling.LANCZOS)
     resized_img_path = media_path + 'resized_' + str(image)
-    print("Image path:")
-    print(resized_img_path)
     resized_img.save(resized_img_path)
 
     result = client.predict(
@@ -61,19 +54,13 @@ def detect(request, prompt: Form[str], image: File[UploadedFile], width: Form[in
     api_name="/compute"
     )
 
-    print(result)
-    
-
     # Delete images after processing.
     [os.remove(os.path.join(media_path, f)) for f in os.listdir(media_path) if os.path.isfile(os.path.join(media_path, f))]
     
-    # print(f"{result=}")
     data = result[0]["value"]
     img_x = result[2]["width"]
     img_y = result[2]["height"]
 
-    print("img_x: ", img_x)
-    print("img_y: ", img_y)
     """
     # create a list of objects detected
     [
@@ -84,14 +71,10 @@ def detect(request, prompt: Form[str], image: File[UploadedFile], width: Form[in
     ]
     """
     container = []
-    print(data)
-    print("No. of objects: ", len(data))
     if len(data) == 0:
         errors = {}
         errors["error"] = "Detection not found."
         errors["result"] = None
-        print("Error in detection:")
-        print(errors)
         return errors
     else:
         for object in data:
@@ -99,9 +82,6 @@ def detect(request, prompt: Form[str], image: File[UploadedFile], width: Form[in
             temp["label"] = object["class_or_confidence"]
             temp['coordinates'] = normalize_coordinates(object["token"], img_x, img_y)
             container.append(temp)
-            print("Success")
-            abc = {"result": container}
-            print(abc)
         return {"result": container}
             
     
