@@ -88,12 +88,8 @@ def detect(request, prompt: Form[str], image: File[UploadedFile], width: Form[in
             else:
                 temp["response"] = object["token"]
         if "detect" in prompt:
-            a = {"result": container}
-            print(a)
             return {"result": container}
         else:
-            b = temp
-            print(b)
             return temp
                
             
