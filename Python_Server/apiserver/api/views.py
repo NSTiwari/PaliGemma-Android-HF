@@ -54,6 +54,8 @@ def detect(request, prompt: Form[str], image: File[UploadedFile], width: Form[in
     api_name="/compute"
     )
 
+    print(result)
+
     # Delete images after processing.
     [os.remove(os.path.join(media_path, f)) for f in os.listdir(media_path) if os.path.isfile(os.path.join(media_path, f))]
     
