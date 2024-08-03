@@ -8,6 +8,9 @@ This repository is an implementation of zero-shot object detection using PaliGem
 ## Demo Output:
 <img src="https://github.com/NSTiwari/PaliGemma-Android-HF/blob/main/assets/paligemma-android.gif"/>
 
+## Resources:
+- [Colab notebooks for PaliGemma](https://github.com/NSTiwari/PaliGemma)
+
 ## Citation
 If you find this project useful for your work, please cite it using the following BibTeX entry:
 
