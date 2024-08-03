@@ -12,6 +12,7 @@ This repository is an implementation of zero-shot object detection using PaliGem
 - [Colab notebooks for PaliGemma](https://github.com/NSTiwari/PaliGemma)
 - [Official Gemma Cookbook](https://github.com/google-gemini/gemma-cookbook)
 - [Medium blog](https://medium.com/p/7716ec262837/edit) for step-by-step implementation.
+- [Big Vision HF 🤗 Spaces](https://huggingface.co/spaces/big-vision/paligemma)
 
 ## Citation
 If you find this project useful for your work, please cite it using the following BibTeX entry:
