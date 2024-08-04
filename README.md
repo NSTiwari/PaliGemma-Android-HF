@@ -2,7 +2,7 @@
 This repository is an implementation of zero-shot object detection using PaliGemma on Android with HF API.
 
 ## Pipeline:
-<img src="https://github.com/NSTiwari/PaliGemma-Android-HF/blob/main/assets/PaliGemma-Android-HF-Pipeline.png"/>
+<img src="https://github.com/NSTiwari/PaliGemma-Android-HF/blob/main/assets/paligemma_android_hf_pipeline.png"/>
 
 
 ## Demo Output:
