@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -120,25 +119,20 @@ fun ImageUploadScreen() {
     )
     val uiState = viewModel.uiState
 
-    var shouldRefreshImage by remember {
-        mutableStateOf(false)
+    var cameraImageFile: File? = remember {
+        null
     }
-    val cameraImageFile = remember(shouldRefreshImage) {
-        context.createImageFile()
+    var cameraUri: Uri? = remember {
+        null
     }
-    val cameraImageUri = remember(cameraImageFile) {
-        Log.d("TAG", "ImageUploadScreen: ImageUri updated with ${cameraImageFile.name}")
-        FileProvider.getUriForFile(
-            Objects.requireNonNull(context),
-            context.packageName + ".provider", cameraImageFile
-        )
-    }
-    var imageUri by rememberSaveable { mutableStateOf<Uri?>(null) }
+    var galleryImageUri by rememberSaveable { mutableStateOf<Uri?>(null) }
+    var cameraImageUri by rememberSaveable { mutableStateOf<Uri?>(null) }
 
     val cameraLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) {
             if (it) {
-                imageUri = cameraImageUri
+                galleryImageUri = null
+                cameraImageUri = cameraUri
                 viewModel.resetData()
             }
         }
@@ -147,8 +141,13 @@ fun ImageUploadScreen() {
         ActivityResultContracts.RequestPermission()
     ) {
         if (it) {
+            cameraImageFile = context.createImageFile()
+            cameraUri = FileProvider.getUriForFile(
+                Objects.requireNonNull(context),
+                context.packageName + ".provider", cameraImageFile!!
+            )
             Toast.makeText(context, "Permission Granted", Toast.LENGTH_SHORT).show()
-            cameraImageUri?.let { it1 -> cameraLauncher.launch(it1) }
+            cameraUri?.let { it1 -> cameraLauncher.launch(it1) }
         } else {
             Toast.makeText(context, "Permission Denied", Toast.LENGTH_SHORT).show()
         }
@@ -161,7 +160,8 @@ fun ImageUploadScreen() {
     ) { uri: Uri? ->
         uri?.let {
             viewModel.resetData()
-            imageUri = it
+            cameraImageUri = null
+            galleryImageUri = it
         }
     }
 
@@ -194,9 +194,9 @@ fun ImageUploadScreen() {
             verticalArrangement = Arrangement.spacedBy(10.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            imageUri?.let {
+            if (galleryImageUri != null || cameraImageUri != null) {
                 ImageWithBoundingBox(
-                    uri = it,
+                    uri = galleryImageUri ?: cameraImageUri!!,
                     results = (uiState as? UiState.Success)?.result
                 ) { h, w ->
                     imageHeight = h
@@ -210,21 +210,25 @@ fun ImageUploadScreen() {
                 Row(
                     modifier = Modifier
                         .padding(16.dp)
-                        .fillMaxWidth()
                         .align(Alignment.CenterHorizontally),
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Button(
                         onClick = {
-                            shouldRefreshImage = !shouldRefreshImage
+                            cameraImageFile = context.createImageFile()
+                            cameraUri = FileProvider.getUriForFile(
+                                Objects.requireNonNull(context),
+                                context.packageName + ".provider", cameraImageFile!!
+                            )
+
                             val permissionCheckResult =
                                 ContextCompat.checkSelfPermission(
                                     context,
                                     android.Manifest.permission.CAMERA
                                 )
                             if (permissionCheckResult == PackageManager.PERMISSION_GRANTED) {
-                                cameraLauncher.launch(cameraImageUri!!)
+                                cameraLauncher.launch(cameraUri!!)
                             } else {
                                 // Request a permission
                                 permissionLauncher.launch(android.Manifest.permission.CAMERA)
@@ -283,12 +287,11 @@ fun ImageUploadScreen() {
                         viewModel.getCoordinatesModel(
                             requestModel = RequestModel(
                                 text = textPrompt,
-                                uri = imageUri ?: Uri.EMPTY,
+                                uri = galleryImageUri ?: Uri.EMPTY,
                                 height = imageHeight.toString(),
                                 width = imageWidth.toString()
                             )
                         )
-                        textPrompt = ""
                     },
                     modifier = Modifier
                         .padding(all = 4.dp)
