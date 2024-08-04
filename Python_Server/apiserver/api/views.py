@@ -30,7 +30,6 @@ def normalize_coordinates(coord: str, img_x, img_y):
 def detect(request, prompt: Form[str], image: File[UploadedFile], width: Form[int], height: Form[int]):
     prompt = prompt.lower()
     prompt_word = prompt.split()
-    print(prompt)
     client = Client("big-vision/paligemma")
     prompt_obj = ImageDetection.objects.create(
         prompt=prompt,
