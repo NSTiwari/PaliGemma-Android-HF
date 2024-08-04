@@ -287,7 +287,7 @@ fun ImageUploadScreen() {
                         viewModel.getCoordinatesModel(
                             requestModel = RequestModel(
                                 text = textPrompt,
-                                uri = galleryImageUri ?: Uri.EMPTY,
+                                uri = galleryImageUri ?: cameraImageUri ?: Uri.EMPTY,
                                 height = imageHeight.toString(),
                                 width = imageWidth.toString()
                             )
