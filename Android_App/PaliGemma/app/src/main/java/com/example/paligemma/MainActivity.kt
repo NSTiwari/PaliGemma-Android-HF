@@ -48,14 +48,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
@@ -65,7 +63,6 @@ import androidx.core.content.FileProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import com.example.paligemma.data.CoordinatesModel
 import com.example.paligemma.data.CoordinatesModelRepoImpl
 import com.example.paligemma.data.CoordinatesModelViewModel
 import com.example.paligemma.data.CoordinatesModelViewModelFactory
@@ -74,8 +71,6 @@ import com.example.paligemma.data.Result
 import com.example.paligemma.data.UiState
 import kotlinx.coroutines.launch
 import java.io.File
-import java.text.SimpleDateFormat
-import java.util.Date
 import java.util.Locale
 import java.util.Objects
 
@@ -123,7 +118,8 @@ fun ImageUploadScreen() {
             )
         )
     )
-    val coordinates by viewModel.coordinates
+    val coordinates = viewModel.coordinates
+    val captionResponse = viewModel.captionResponse
 
     var shouldRefreshImage by remember {
         mutableStateOf(false)
@@ -173,7 +169,7 @@ fun ImageUploadScreen() {
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     LaunchedEffect(key1 = coordinates) {
-        if(coordinates is UiState.Error) {
+        if (coordinates is UiState.Error) {
             scope.launch {
                 snackbarHostState.showSnackbar((coordinates as UiState.Error).e)
             }
@@ -190,10 +186,11 @@ fun ImageUploadScreen() {
                 )
             }
         }
-    ) { it->
+    ) { it ->
         Column(
             modifier = Modifier
                 .padding(it)
+                .fillMaxWidth()
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(10.dp),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -215,6 +212,7 @@ fun ImageUploadScreen() {
                 Row(
                     modifier = Modifier
                         .padding(16.dp)
+                        .fillMaxWidth()
                         .align(Alignment.CenterHorizontally),
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                     verticalAlignment = Alignment.CenterVertically
