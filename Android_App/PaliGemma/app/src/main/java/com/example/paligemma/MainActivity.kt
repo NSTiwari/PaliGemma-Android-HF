@@ -53,8 +53,8 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.drawText
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -118,8 +118,7 @@ fun ImageUploadScreen() {
             )
         )
     )
-    val coordinates = viewModel.coordinates
-    val captionResponse = viewModel.captionResponse
+    val uiState = viewModel.uiState
 
     var shouldRefreshImage by remember {
         mutableStateOf(false)
@@ -168,10 +167,10 @@ fun ImageUploadScreen() {
 
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
-    LaunchedEffect(key1 = coordinates) {
-        if (coordinates is UiState.Error) {
+    LaunchedEffect(key1 = uiState) {
+        if (uiState is UiState.Error) {
             scope.launch {
-                snackbarHostState.showSnackbar((coordinates as UiState.Error).e)
+                snackbarHostState.showSnackbar(uiState.e)
             }
         }
     }
@@ -198,17 +197,16 @@ fun ImageUploadScreen() {
             imageUri?.let {
                 ImageWithBoundingBox(
                     uri = it,
-                    results = (coordinates as? UiState.Success)?.result
+                    results = (uiState as? UiState.Success)?.result
                 ) { h, w ->
                     imageHeight = h
                     imageWidth = w
                 }
             }
 
-            if (coordinates is UiState.Loading) {
+            if (uiState is UiState.Loading) {
                 CircularProgressIndicator(color = Color(0xFF29B6F6))
             } else {
-
                 Row(
                     modifier = Modifier
                         .padding(16.dp)
@@ -302,6 +300,29 @@ fun ImageUploadScreen() {
                 ) {
                     Text("Submit")
                 }
+
+                if (uiState is UiState.CaptionResponse) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(20.dp)
+                    ) {
+                        Text(
+                            text = "PaliGemma response:",
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = Color.White
+                        )
+                        Text(
+                            text = uiState.msg,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Normal,
+                            color = Color.White
+                        )
+                    }
+                }
+
             }
         }
     }
@@ -312,7 +333,7 @@ fun ImageUploadScreen() {
 @Composable
 fun ImageWithBoundingBox(
     uri: Uri,
-    results : List<Result>?,
+    results: List<Result>?,
     onSizeChange: (Int, Int) -> Unit
 ) {
     //initial height set at 0.dp

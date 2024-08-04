@@ -12,31 +12,32 @@ class CoordinatesModelViewModel(
     private val coordinatesModelRepo: CoordinatesModelRepo
 ) : ViewModel() {
 
-    var coordinates by mutableStateOf<UiState>(UiState.Idle)
-    var captionResponse by mutableStateOf<String?>(null)
+    var uiState by mutableStateOf<UiState>(UiState.Idle)
 
     fun getCoordinatesModel(requestModel: RequestModel) {
-        coordinates = UiState.Loading
+        uiState = UiState.Loading
         viewModelScope.launch {
             try {
                 val coordinatesModel = coordinatesModelRepo
                     .getCoordinatesModel(requestModel)
                     .body()
-                captionResponse = coordinatesModel?.response
+
                 if (coordinatesModel?.result != null) {
-                    coordinates = UiState.Success(
+                    uiState = UiState.Success(
                         coordinatesModel.result
                     )
                 } else if (coordinatesModel?.error != null) {
-                    coordinates = UiState.Error(
+                    uiState = UiState.Error(
                         coordinatesModel.error
                     )
+                } else if (coordinatesModel?.response != null) {
+                    uiState = UiState.CaptionResponse(coordinatesModel.response)
                 } else {
-                    coordinates = UiState.Error("No result found.")
+                    uiState = UiState.Error("No result found.")
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
-                coordinates = if (e.message != null) {
+                uiState = if (e.message != null) {
                     UiState.Error(e.message!!)
                 } else {
                     UiState.Error("An unknown error occurred.")
@@ -46,7 +47,7 @@ class CoordinatesModelViewModel(
     }
 
     fun resetData() {
-        coordinates = UiState.Idle
+        uiState = UiState.Idle
     }
 }
 
@@ -61,5 +62,6 @@ sealed interface UiState {
     data object Idle : UiState
     data object Loading : UiState
     data class Success(val result: List<Result>) : UiState
+    data class CaptionResponse(val msg: String) : UiState
     data class Error(val e: String) : UiState
 }
