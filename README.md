@@ -18,9 +18,9 @@ This repository is an implementation of zero-shot object detection using PaliGem
 If you find this project useful for your work, please cite it using the following BibTeX entry:
 
 ```
-@misc{PaliGemma Examples,
+@misc{PaliGemma on Android using Hugging Face API,
   authors      = {Nitin Tiwari, Sagar Malhotra, Savio Rodrigues},
-  title        = {PaliGemma on Android using HF},
+  title        = {PaliGemma on Android using Hugging Face API},
   year         = {2024},
   publisher    = {GitHub},
   howpublished = {\url{https://github.com/NSTiwari/PaliGemma-Android-HF}},
