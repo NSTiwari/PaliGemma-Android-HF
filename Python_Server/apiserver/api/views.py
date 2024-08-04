@@ -28,7 +28,7 @@ def normalize_coordinates(coord: str, img_x, img_y):
 
 @api.post('/detect')
 def detect(request, prompt: Form[str], image: File[UploadedFile], width: Form[int], height: Form[int]):
-
+    text_prompt = prompt.split()
     client = Client("big-vision/paligemma")
     prompt_obj = ImageDetection.objects.create(
         prompt=prompt,
@@ -81,7 +81,7 @@ def detect(request, prompt: Form[str], image: File[UploadedFile], width: Form[in
     else:
         for object in data:
             temp = {}
-            if "detect" in prompt:
+            if text_prompt[0].lower() == "detect":
                 temp["label"] = object["class_or_confidence"]
                 temp['coordinates'] = normalize_coordinates(object["token"], img_x, img_y)
                 container.append(temp)
