@@ -1,5 +1,6 @@
 # PaliGemma Android HF
-This repository is an implementation of zero-shot object detection using PaliGemma on Android with HF API.
+This repository is an implementation of inferring the PaliGemma Vision Language Model on Android using Hugging Face-Gradio Client API for tasks such as zero-shot object detection, image captioning and visual question-answering.
+
 
 ## Pipeline:
 <img src="https://github.com/NSTiwari/PaliGemma-Android-HF/blob/main/assets/paligemma_android_hf_pipeline.png"/>
