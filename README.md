@@ -12,7 +12,7 @@ This repository is an implementation of inferring the PaliGemma Vision Language 
 ## Resources:
 - [Colab notebooks for PaliGemma](https://github.com/NSTiwari/PaliGemma)
 - [Official Gemma Cookbook](https://github.com/google-gemini/gemma-cookbook)
-- [Medium blog](https://medium.com/p/7716ec262837/edit) for step-by-step implementation.
+- [Medium blog](https://tiwarinitin1999.medium.com/paligemma-on-android-using-hugging-face-api-7716ec262837) for step-by-step implementation.
 - [Big Vision HF 🤗 Spaces](https://huggingface.co/spaces/big-vision/paligemma)
 
 ## Citation
