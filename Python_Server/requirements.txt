@@ -37,7 +37,7 @@ markdown-it-py==3.0.0
 MarkupSafe==2.1.5
 matplotlib==3.9.1
 mdurl==0.1.2
-numpy==2.0.0
+numpy==1.26.4
 orjson==3.10.6
 packaging==24.1
 pandas==2.2.2
@@ -81,4 +81,4 @@ overrides
 ml_collections
 einops~=0.7
 sentencepiece
-tensorflow
+tensorflow==2.12.0
