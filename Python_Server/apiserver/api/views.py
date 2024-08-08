@@ -2,6 +2,7 @@ from ninja import NinjaAPI, File, UploadedFile, Form
 from gradio_client import Client, handle_file
 from PIL import Image
 import numpy as np
+import tensorflow as tf
 
 # from decouple import config     #if using your own token
 
@@ -16,7 +17,8 @@ import subprocess
 
 
 api = NinjaAPI()
-# 
+print(tf.__version__)
+print(np.__version__)
 
 print("Before: ")
 print("OS Path: ", os.path)
