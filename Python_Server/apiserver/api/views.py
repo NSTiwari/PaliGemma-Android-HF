@@ -13,20 +13,28 @@ import sys
 import os
 import re
 
+import subprocess
+
 
 api = NinjaAPI()
 # reconstruct_masks = segeval.get_reconstruct_masks('oi')
 
+print("Before: ")
 print("OS Path: ", os.path)
 print("Sys Path: ", sys.path)
 
 print("Big_Vision_path")
 print(os.path.exists("big_vision_repo"))
 
+if not os.path.exists("big_vision_repo"):
+  subprocess.run(["git", "clone", "--quiet", "--branch=main", "--depth=1", "https://github.com/google-research/big_vision", "big_vision_repo"], check=True)
+  print("Cloned the repo.")
+
 if "big_vision_repo" not in sys.path:
   sys.path.append("big_vision_repo")
   print("Added Big_Vision_Repo to path")
 
+print("After: ")
 print("OS Path: ", os.path)
 print("Sys Path: ", sys.path)
 
