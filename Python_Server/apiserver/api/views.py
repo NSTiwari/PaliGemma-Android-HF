@@ -142,13 +142,15 @@ def detect(request, prompt: Form[str], image: File[UploadedFile], width: Form[in
                             y_mask.append(y)
 
                 temp["label"] = object["class_or_confidence"]
-                temp["segment_x"] = x_mask
-                temp["segment_y"] = y_mask
-                return temp
+                temp["mask_x"] = x_mask
+                temp["mask_y"] = y_mask
+                container.append(temp)
             else:
                 temp["response"] = object["token"]
         if "detect" in prompt:
             return {"result": container}
+        elif "segment" in prompt:
+            return {"segment": container}
         else:
             return temp
                
