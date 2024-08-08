@@ -1,8 +1,6 @@
 from ninja import NinjaAPI, File, UploadedFile, Form
 from gradio_client import Client, handle_file
 from PIL import Image
-import numpy as np
-import tensorflow as tf
 
 # from decouple import config     #if using your own token
 
@@ -17,29 +15,16 @@ import subprocess
 
 
 api = NinjaAPI()
-print(tf.__version__)
-print(np.__version__)
-
-print("Before: ")
-print("OS Path: ", os.path)
-print("Sys Path: ", sys.path)
-
-print("Big_Vision_path")
-print(os.path.exists("big_vision_repo"))
 
 if not os.path.exists("big_vision_repo"):
   subprocess.run(["git", "clone", "--quiet", "--branch=main", "--depth=1", "https://github.com/google-research/big_vision", "big_vision_repo"], check=True)
-  print("Cloned the repo.")
-
+  
 if "big_vision_repo" not in sys.path:
   sys.path.append("big_vision_repo")
-  print("Added Big_Vision_Repo to path")
+  
 
-print("After: ")
-print(os.path.exists("big_vision_repo"))
-
-import big_vision_repo.big_vision.evaluators.proj.paligemma.transfers.segmentation as segeval
-reconstruct_masks = segeval.get_reconstruct_masks('oi')
+# import big_vision_repo.big_vision.evaluators.proj.paligemma.transfers.segmentation as segeval
+# reconstruct_masks = segeval.get_reconstruct_masks('oi')
 
 def normalize_coordinates(coord: str, img_x, img_y):
     detect_pattern = r'<loc(\d+)>'
