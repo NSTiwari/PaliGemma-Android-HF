@@ -34,8 +34,7 @@ if "big_vision_repo" not in sys.path:
   print("Added Big_Vision_Repo to path")
 
 print("After: ")
-print("OS Path: ", os.path)
-print("Sys Path: ", sys.path)
+print(os.path.exists("big_vision_repo"))
 
 import big_vision_repo.big_vision.evaluators.proj.paligemma.transfers.segmentation as segeval
 reconstruct_masks = segeval.get_reconstruct_masks('oi')
