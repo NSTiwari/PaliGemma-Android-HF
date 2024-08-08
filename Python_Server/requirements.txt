@@ -81,3 +81,4 @@ overrides
 ml_collections
 einops~=0.7
 sentencepiece
+tensorflow
