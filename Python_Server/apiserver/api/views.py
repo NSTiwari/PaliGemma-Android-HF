@@ -20,9 +20,15 @@ api = NinjaAPI()
 print("OS Path: ", os.path)
 print("Sys Path: ", sys.path)
 
+print("Big_Vision_path")
+print(os.path.exists("big_vision_repo"))
+
 if "big_vision_repo" not in sys.path:
   sys.path.append("big_vision_repo")
   print("Added Big_Vision_Repo to path")
+
+print("OS Path: ", os.path)
+print("Sys Path: ", sys.path)
 
 def normalize_coordinates(coord: str, img_x, img_y):
     detect_pattern = r'<loc(\d+)>'
