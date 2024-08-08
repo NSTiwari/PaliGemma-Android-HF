@@ -1,7 +1,6 @@
 from ninja import NinjaAPI, File, UploadedFile, Form
 from gradio_client import Client, handle_file
 from PIL import Image
-# import big_vision.evaluators.proj.paligemma.transfers.segmentation as segeval
 import numpy as np
 
 # from decouple import config     #if using your own token
@@ -17,7 +16,7 @@ import subprocess
 
 
 api = NinjaAPI()
-# reconstruct_masks = segeval.get_reconstruct_masks('oi')
+# 
 
 print("Before: ")
 print("OS Path: ", os.path)
@@ -37,6 +36,9 @@ if "big_vision_repo" not in sys.path:
 print("After: ")
 print("OS Path: ", os.path)
 print("Sys Path: ", sys.path)
+
+import big_vision_repo.big_vision.evaluators.proj.paligemma.transfers.segmentation as segeval
+reconstruct_masks = segeval.get_reconstruct_masks('oi')
 
 def normalize_coordinates(coord: str, img_x, img_y):
     detect_pattern = r'<loc(\d+)>'
