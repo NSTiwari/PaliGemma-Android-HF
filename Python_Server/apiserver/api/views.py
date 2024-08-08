@@ -1,7 +1,7 @@
 from ninja import NinjaAPI, File, UploadedFile, Form
 from gradio_client import Client, handle_file
 from PIL import Image
-#import big_vision.evaluators.proj.paligemma.transfers.segmentation as segeval
+import big_vision.evaluators.proj.paligemma.transfers.segmentation as segeval
 import numpy as np
 
 # from decouple import config     #if using your own token
@@ -15,7 +15,7 @@ import re
 
 
 api = NinjaAPI()
-#reconstruct_masks = segeval.get_reconstruct_masks('oi')
+reconstruct_masks = segeval.get_reconstruct_masks('oi')
 
 if "big_vision_repo" not in sys.path:
   sys.path.append("big_vision_repo")
@@ -150,6 +150,8 @@ def detect(request, prompt: Form[str], image: File[UploadedFile], width: Form[in
         if "detect" in prompt:
             return {"result": container}
         elif "segment" in prompt:
+            a = {"segment": container}
+            print(a)
             return {"segment": container}
         else:
             return temp
