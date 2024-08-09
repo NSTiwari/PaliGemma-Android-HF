@@ -58,7 +58,7 @@ def detect(request, prompt: Form[str], image: File[UploadedFile], width: Form[in
     resized_img.save(resized_img_path)
 
     if prompt_word[0] == "segment":
-    	prompt = promot.replace("segment ", "")
+    	prompt = prompt.replace("segment ", "")
     	result = client.predict(
     		image=handle_file(resized_img_path),
     		task_prompt="Referring Expression Segmentation",
@@ -110,7 +110,11 @@ def detect(request, prompt: Form[str], image: File[UploadedFile], width: Form[in
     				temp["response"] = object["token"]
 
     		if "detect" in prompt:
+                a = {"result": container)
+                print(a)
     			return {"result": container}
     		else:
+                b = temp
+                print(b)
     			return temp
 
