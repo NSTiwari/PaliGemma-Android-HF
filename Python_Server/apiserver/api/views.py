@@ -59,6 +59,7 @@ def detect(request, prompt: Form[str], image: File[UploadedFile], width: Form[in
 
     if prompt_word[0] == "segment":
     	prompt = prompt.replace("segment ", "")
+        label = prompt.split(";")[0]
     	result = client.predict(
     		image=handle_file(resized_img_path),
     		task_prompt="Referring Expression Segmentation",
@@ -73,6 +74,7 @@ def detect(request, prompt: Form[str], image: File[UploadedFile], width: Form[in
 
     	result = json.loads(result[0].replace("'", '"'))
     	polygons = result['<REFERRING_EXPRESSION_SEGMENTATION>']
+        polygons["labels"] = label
     	return polygons
 
     else:
