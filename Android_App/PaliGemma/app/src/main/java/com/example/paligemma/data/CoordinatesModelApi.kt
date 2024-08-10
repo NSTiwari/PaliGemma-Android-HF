@@ -31,7 +31,7 @@ interface CoordinatesModelApi {
                 .writeTimeout(240, TimeUnit.SECONDS)
                 .readTimeout(240, TimeUnit.SECONDS)
                 .build()
-        val instance by lazy {
+        val instance: CoordinatesModelApi by lazy {
             Retrofit.Builder()
                 .baseUrl("https://paligemma.onrender.com")
                 .addConverterFactory(GsonConverterFactory.create())

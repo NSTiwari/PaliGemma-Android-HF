@@ -1,4 +1,4 @@
-package com.example.paligemma
+package com.example.paligemma.presentation
 
 import android.content.Context
 import android.content.pm.PackageManager
@@ -10,14 +10,17 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -35,7 +38,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,8 +46,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -63,14 +63,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.paligemma.data.CoordinatesModelRepoImpl
-import com.example.paligemma.data.CoordinatesModelViewModel
-import com.example.paligemma.data.CoordinatesModelViewModelFactory
 import com.example.paligemma.data.RequestModel
-import com.example.paligemma.data.Result
-import com.example.paligemma.data.UiState
 import kotlinx.coroutines.launch
 import java.io.File
-import java.util.Locale
 import java.util.Objects
 
 
@@ -119,9 +114,7 @@ fun ImageUploadScreen() {
     )
     val uiState = viewModel.uiState
 
-    var cameraImageFile: File? = remember {
-        null
-    }
+    var cameraImageFile: File?
     var cameraUri: Uri? = remember {
         null
     }
@@ -197,10 +190,12 @@ fun ImageUploadScreen() {
             if (galleryImageUri != null || cameraImageUri != null) {
                 ImageWithBoundingBox(
                     uri = galleryImageUri ?: cameraImageUri!!,
-                    results = (uiState as? UiState.Success)?.result
-                ) { h, w ->
+                    objectDetectionUiData = (uiState as? UiState.ObjectDetectionResponse)?.result,
+                    segmentationUiData = (uiState as? UiState.SegmentationResponse)?.result,
+                ) { h, w, leftDistance ->
                     imageHeight = h
                     imageWidth = w
+                    viewModel.imageLeftDistance = leftDistance
                 }
             }
 
@@ -235,6 +230,7 @@ fun ImageUploadScreen() {
                             }
                         },
                         modifier = Modifier
+                            .weight(1f)
                             .padding(all = 4.dp),
                         colors = ButtonDefaults.buttonColors(
                             // Old color = #1A73E8
@@ -249,6 +245,7 @@ fun ImageUploadScreen() {
                             pickMedia.launch("image/*")
                         },
                         modifier = Modifier
+                            .weight(1f)
                             .padding(all = 4.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color(0xFF29B6F6),
@@ -304,45 +301,128 @@ fun ImageUploadScreen() {
                     Text("Submit")
                 }
 
+                if (uiState is UiState.SegmentationResponse) {
+                    DrawSegmentationTextUi(uiState.result)
+                }
+
                 if (uiState is UiState.CaptionResponse) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(20.dp)
-                    ) {
-                        Text(
-                            text = "PaliGemma response:",
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.ExtraBold,
-                            color = Color.White
-                        )
-                        Text(
-                            text = uiState.msg,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Normal,
-                            color = Color.White
-                        )
-                    }
+                    DrawCaptionResponse(uiState.result)
                 }
 
             }
         }
     }
+}
 
+@Composable
+private fun DrawCaptionResponse(result: String) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(20.dp)
+    ) {
+        TitleText(
+            text = "PaliGemma response:",
+        )
+        Text(
+            text = result,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Normal,
+            color = Color.White
+        )
+    }
+}
+
+@Composable
+private fun DrawSegmentationTextUi(results: SegmentationUiData) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        TitleText(
+            text = "Segmentation response:",
+        )
+
+        Spacer(modifier = Modifier)
+
+        results.colorsMap.forEach { (label, color) ->
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(10.dp)
+                        .background(color)
+                )
+                Text(text = label)
+            }
+        }
+
+    }
+}
+
+@Composable
+fun DrawSegmentationImageUi(results: SegmentationUiData) {
+    Canvas(modifier = Modifier) {
+        results.data.forEach { result ->
+            drawPath(
+                path = result.path,
+                color = result.color,
+                alpha = 0.5f
+            )
+        }
+    }
+}
+
+@Composable
+private fun TitleText(text: String) {
+    Text(
+        text = text,
+        fontSize = 20.sp,
+        fontWeight = FontWeight.ExtraBold,
+        color = Color.White
+    )
+}
+
+@Composable
+private fun DrawObjectDetectionResponse(results: List<ObjectDetectionUiData>) {
+    //initial height set at 0.dp
+    val textMeasurer = rememberTextMeasurer()
+    results.forEach { result ->
+        Canvas(modifier = Modifier) {
+            drawRect(
+                color = result.color,
+                style = Stroke(width = 5f),
+                topLeft = result.topLeft,
+                size = result.size
+            )
+            drawText(
+                textMeasurer = textMeasurer,
+                topLeft = result.textTopLeft,
+                text = result.text,
+                style = TextStyle(
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                    background = result.color
+                ),
+                size = result.size
+            )
+        }
+    }
 }
 
 
 @Composable
-fun ImageWithBoundingBox(
+private fun ImageWithBoundingBox(
     uri: Uri,
-    results: List<Result>?,
-    onSizeChange: (Int, Int) -> Unit
+    objectDetectionUiData: List<ObjectDetectionUiData>?,
+    segmentationUiData: SegmentationUiData?,
+    onSizeChange: (Int, Int, Float) -> Unit
 ) {
-    //initial height set at 0.dp
-    var leftDistance by remember { mutableFloatStateOf(0.0f) }
-    val textMeasurer = rememberTextMeasurer()
-
     Box {
         Column(
             modifier = Modifier.fillMaxWidth(),
@@ -355,62 +435,18 @@ fun ImageWithBoundingBox(
                 modifier = Modifier
                     .heightIn(max = 450.dp)
                     .onGloballyPositioned {
-                        leftDistance = it.positionInRoot().x
-                        onSizeChange(it.size.height, it.size.width)
+                        onSizeChange(it.size.height, it.size.width, it.positionInRoot().x)
                     },
                 contentDescription = null
             )
         }
-        val map = remember {
-            HashMap<String, Color>()
+
+        objectDetectionUiData?.let {
+            DrawObjectDetectionResponse(results = objectDetectionUiData)
         }
-        results?.forEach { result ->
-            val (y1, x1, y2, x2) = remember {
-                result.coordinates
-            }
-            map.putIfAbsent(result.label.removeTicks(), getRandomColor())
-            Canvas(modifier = Modifier.fillMaxSize()) {
-                drawRect(
-                    color = map.getOrDefault(result.label.removeTicks(), Color.Transparent),
-                    style = Stroke(width = 5f),
-                    topLeft = Offset(x1.toFloat() + leftDistance, y1.toFloat()),
-                    size = Size(
-                        width = (x2 - x1).toFloat(),
-                        height = (y2 - y1).toFloat()
-                    )
-                )
-                drawText(
-                    textMeasurer = textMeasurer,
-                    topLeft = Offset(x1.toFloat() + leftDistance, y1.toFloat() - 40),
-                    text = result.label.removeTicks()
-                        .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.US) else it.toString() },
-                    style = TextStyle(
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White,
-                        background = map.getOrDefault(result.label.removeTicks(), Color.Transparent)
-                    ),
-                    size = Size(
-                        width = (x2 - x1).toFloat(),
-                        height = (y2 - y1).toFloat()
-                    )
-                )
-            }
+
+        segmentationUiData?.let {
+            DrawSegmentationImageUi(results = segmentationUiData)
         }
     }
-}
-
-fun String.removeTicks(): String {
-    return this.replace("'", "").trim()
-}
-
-fun getRandomColor(): Color {
-    val r = (1..254).random()
-    val g = (1..254).random()
-    val b = (1..254).random()
-    return Color(
-        red = r,
-        green = g,
-        blue = b
-    )
 }
