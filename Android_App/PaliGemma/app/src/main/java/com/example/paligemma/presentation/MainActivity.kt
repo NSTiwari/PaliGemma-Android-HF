@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -23,9 +22,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Clear
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -263,8 +266,6 @@ fun ImageUploadScreen() {
                         unfocusedBorderColor = Color(0xFF29B6F6),
                         focusedLabelColor = Color(0xFF29B6F6),
                         unfocusedLabelColor = Color(0xFF29B6F6),
-                        // focusedIndicatorColor = Color.White,
-                        // unfocusedIndicatorColor = Color.White,
                         focusedPlaceholderColor = Color(0xFFF5F5F5),
                         unfocusedPlaceholderColor = Color(0xFFF5F5F5),
                         focusedTextColor = Color.White,
@@ -277,6 +278,18 @@ fun ImageUploadScreen() {
                     modifier = Modifier
                         .padding(all = 4.dp)
                         .align(Alignment.CenterHorizontally),
+                    trailingIcon = if (textPrompt.isNotEmpty()) {
+                        {
+                            IconButton(onClick = { textPrompt = "" }) {
+                                Icon(
+                                    imageVector = Icons.Rounded.Clear,
+                                    contentDescription = null
+                                )
+                            }
+                        }
+                    } else {
+                        null
+                    }
                 )
 
                 Button(
@@ -339,25 +352,25 @@ private fun DrawSegmentationTextUi(results: SegmentationUiData) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp),
+            .padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        TitleText(
-            text = "Segmentation response:",
-        )
-
-        Spacer(modifier = Modifier)
-
         results.colorsMap.forEach { (label, color) ->
             Row(
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Box(
                     modifier = Modifier
-                        .size(10.dp)
+                        .size(20.dp)
                         .background(color)
                 )
-                Text(text = label)
+                Text(
+                    text = label,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Normal,
+                    color = Color.White
+                )
             }
         }
 
@@ -371,7 +384,7 @@ fun DrawSegmentationImageUi(results: SegmentationUiData) {
             drawPath(
                 path = result.path,
                 color = result.color,
-                alpha = 0.5f
+                alpha = 0.75f
             )
         }
     }

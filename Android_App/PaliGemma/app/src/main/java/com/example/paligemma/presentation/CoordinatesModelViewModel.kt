@@ -16,7 +16,6 @@ import com.example.paligemma.data.RequestModel
 import com.example.paligemma.data.Result
 import kotlinx.coroutines.launch
 import java.util.Locale
-import kotlin.math.min
 
 class CoordinatesModelViewModel(
     private val coordinatesModelRepo: CoordinatesModelRepo
@@ -81,8 +80,8 @@ class CoordinatesModelViewModel(
     ): SegmentationUiData {
         val map = HashMap<String, Color>()
         val segmentUiList = mutableListOf<SegmentationUiData.SegmentUiData>()
-        polygons.getOrNull(0)?.forEachIndexed { idx,it->
-            map.putIfAbsent(labels[idx].removeTicks(), getRandomColor())
+        polygons.getOrNull(0)?.forEachIndexed { idx, it ->
+            map.putIfAbsent(labels[idx].filterLabel(), getRandomColor())
             val points = it.chunked(2).map { (x, y) ->
                 Offset(x.toFloat() + imageLeftDistance, y.toFloat())
             }
@@ -94,9 +93,11 @@ class CoordinatesModelViewModel(
             }
             path.close()
 
-            SegmentationUiData.SegmentUiData(
-                path = path,
-                color = map.getOrDefault(labels[idx].removeTicks(), Color.Transparent)
+            segmentUiList.add(
+                SegmentationUiData.SegmentUiData(
+                    path = path,
+                    color = map.getOrDefault(labels[idx].filterLabel(), Color.Transparent)
+                )
             )
         }
         return SegmentationUiData(
@@ -109,17 +110,16 @@ class CoordinatesModelViewModel(
         val map = HashMap<String, Color>()
         return results.map { result ->
             val (y1, x1, y2, x2) = result.coordinates
-            map.putIfAbsent(result.label.removeTicks(), getRandomColor())
+            map.putIfAbsent(result.label.filterLabel(), getRandomColor())
 
             ObjectDetectionUiData(
                 topLeft = Offset(x1.toFloat() + imageLeftDistance, y1.toFloat()),
-                color = map.getOrDefault(result.label.removeTicks(), Color.Transparent),
+                color = map.getOrDefault(result.label.filterLabel(), Color.Transparent),
                 size = Size(
                     width = (x2 - x1).toFloat(),
                     height = (y2 - y1).toFloat()
                 ),
-                text = result.label.removeTicks()
-                    .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.US) else it.toString() },
+                text = result.label.filterLabel(),
                 textTopLeft = Offset(x1.toFloat() + imageLeftDistance, y1.toFloat() - 40)
             )
         }
@@ -137,8 +137,8 @@ class CoordinatesModelViewModelFactory(private val coordinatesModelRepo: Coordin
     }
 }
 
-private fun String.removeTicks(): String {
-    return this.replace("'", "").trim()
+private fun String.filterLabel(): String {
+    return this.replace("'", "").trim().replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.US) else it.toString() }
 }
 
 private fun getRandomColor(): Color {
