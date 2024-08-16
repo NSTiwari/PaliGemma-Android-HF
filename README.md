@@ -7,11 +7,11 @@ This repository is an implementation of inferring the PaliGemma Vision Language 
 
 
 ## Demo Outputs:
-<img src="https://github.com/NSTiwari/PaliGemma-Android-HF/blob/main/assets/paligemma-android-hf1.gif" width="400"/>
+<img src="https://github.com/NSTiwari/PaliGemma-Android-HF/blob/main/assets/paligemma-android-hf1.gif"/>
 
 
 
-<img src="https://github.com/NSTiwari/PaliGemma-Android-HF/blob/main/assets/paligemma-android-segmentation.gif"/>
+<img src="https://github.com/NSTiwari/PaliGemma-Android-HF/blob/main/assets/paligemma-android-segmentation.gif" width="400"/>
 
 ## Resources:
 - [Colab notebooks for PaliGemma](https://github.com/NSTiwari/PaliGemma)
