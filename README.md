@@ -3,6 +3,7 @@ This repository is an implementation of inferring the PaliGemma Vision Language 
 
 
 ## Pipeline:
+
 **Visual question-answering, zero-shot object detection, image captioning**
 
 <img src="https://github.com/NSTiwari/PaliGemma-Android-HF/blob/main/assets/paligemma_android_hf_pipeline.png"/>
