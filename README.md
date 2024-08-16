@@ -11,6 +11,7 @@ This repository is an implementation of inferring the PaliGemma Vision Language 
 
 
 Segmentation
+
 <img src="https://github.com/NSTiwari/PaliGemma-Android-HF/blob/main/assets/paligemma-android-segmentation.gif" width="400"/>
 
 ## Resources:
