@@ -82,7 +82,6 @@ def detect(request, prompt: Form[str], image: File[UploadedFile], width: Form[in
 
     	polygons['labels'] = prompt_labels
 
-    	print(polygons)
     	# Delete images after processing.
     	[os.remove(os.path.join(media_path, f)) for f in os.listdir(media_path) if os.path.isfile(os.path.join(media_path, f))]
 
@@ -97,7 +96,6 @@ def detect(request, prompt: Form[str], image: File[UploadedFile], width: Form[in
     	api_name="/compute"
     	)
 
-    	print(result)
 
     	# Delete images after processing.
     	[os.remove(os.path.join(media_path, f)) for f in os.listdir(media_path) if os.path.isfile(os.path.join(media_path, f))]
@@ -123,11 +121,7 @@ def detect(request, prompt: Form[str], image: File[UploadedFile], width: Form[in
     				temp["response"] = object["token"]
 
     		if "detect" in prompt:
-    			a = {"result": container}
-    			print(a)
     			return {"result": container}
     		else:
-    			b = temp
-    			print(temp)
     			return temp
 
