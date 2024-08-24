@@ -13,8 +13,6 @@ import re
 import json
 import numpy as np
 
-import subprocess
-
 
 api = NinjaAPI()
 
