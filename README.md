@@ -16,7 +16,7 @@ This repository is an implementation of inferring the PaliGemma Vision Language 
 
 **Reference Expression Segmentation**
 
-Model used: Florence-2
+Model used: [Florence-2](https://huggingface.co/microsoft/Florence-2-large)
 
 <img src="https://github.com/NSTiwari/PaliGemma-Android-HF/blob/main/assets/paligemma-android-segmentation.gif" width="400"/>
 
