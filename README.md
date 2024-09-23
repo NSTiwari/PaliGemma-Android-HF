@@ -38,3 +38,9 @@ If you find this project useful for your work, please cite it using the followin
   howpublished = {\url{https://github.com/NSTiwari/PaliGemma-Android-HF}},
 }
 ```
+
+## Acknowledgment
+<img src="https://github.com/NSTiwari/PaliGemma-Android-HF/blob/main/assets/google.png">
+
+This project was developed during Google's ML Developer Programs AI Sprint. Thanks to the MLDP team for providing Google Cloud credits to support this project.
+
